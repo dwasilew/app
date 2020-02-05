@@ -53,7 +53,7 @@
 			"item_template": "Item Template",
 			"item_template_comment": "How to display values on the single item layouts",
 			"item_template_placeholder": "{{name}} — {{first_name}}",
-			"listing_template": "列表模板",
+			"listing_template": "列表显示模板",
 			"listing_template_comment": "How to display values on the listing layouts.<br>You'll need to prepend the collection name",
 			"listing_template_placeholder": "{{movie.name}} — {{member.first_name}}"
 		},
@@ -72,19 +72,19 @@
 			"collections": "集合",
 			"placeholder": "Placeholder",
 			"placeholder_comment": "Static text that shown before a value is selected",
-			"placeholder_default": "Choose a collection...",
+			"placeholder_default": "选择集合",
 			"option": "选项",
-			"include_system": "Include System",
-			"include_system_comment": "Include system collections in the options"
+			"include_system": "包括系统集合",
+			"include_system_comment": "在选项中包含系统集合"
 		},
 		"color": {
-			"color": "Color",
-			"format": "Output Format",
-			"format_comment": "In what data format to save the value",
-			"palette": "Palette",
+			"color": "颜色",
+			"format": "输出格式",
+			"format_comment": "数据的保存格式",
+			"palette": "调色板",
 			"palette_comment": "Add color options as hex values",
-			"palette_only": "Palette Only",
-			"palette_only_comment": "Only allow the user to pick from the palette"
+			"palette_only": "仅调色板",
+			"palette_only_comment": "只允许用户从调色板中选取颜色"
 		},
 		"color-palette": {
 			"color-picker": "Color Picker"
