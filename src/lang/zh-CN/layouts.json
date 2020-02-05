@@ -11,7 +11,7 @@
       "datetime": "日期时间",
       "time": "Time",
       "title": "标题",
-      "color": "Color"
+      "color": "颜色"
     },
     "cards": {
       "cards": "卡片",
@@ -35,7 +35,7 @@
       "date": "日期",
       "content": "内容",
       "title": "标题",
-      "color": "Color"
+      "color": "颜色"
     }
   }
 }
