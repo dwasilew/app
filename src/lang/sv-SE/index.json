@@ -294,7 +294,7 @@
   "install_busy_copy": "Thank you. One moment while we create your database, import your schema, and add a new config file for this API.",
   "install_all_set_copy": "The project has successfully been created. You can now sign in to the App with the admin credentials you entered.",
   "install_all_set_super_admin_password": "Make sure to copy the generated Super-Admin password below. You won't be able to see it again!",
-  "php_extensions": "PHP Extensions",
+  "php_extensions": "PHP Tilläggsmoduler",
   "missing_value": "Missing: {value}",
   "write_access": "Skrivåtkomst",
   "value_not_writeable": "{value} not writeable",
