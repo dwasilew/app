@@ -12,7 +12,7 @@
 			<template v-if="choice.custom">
 				<button @click="choices[index].checked = !choices[index].checked">
 					<v-icon
-						color="blue-grey-800"
+						color="--blue-grey-800"
 						:name="choice.checked ? 'check_box' : 'check_box_outline_blank'"
 					/>
 				</button>
@@ -27,20 +27,21 @@
 				:value="choice.key"
 				:disabled="readonly"
 				:label="choice.value"
-				:checked="choice.checked"
+				:inputValue="choice.checked"
 				@change="choices[index].checked = !choices[index].checked"
 			/>
 		</div>
-		<button v-if="options.allow_other" @click="addCustom">{{ $t("add_new") }}...</button>
+		<button v-if="options.allow_other" @click="addCustom">{{ $t('add_new') }}...</button>
 	</draggable>
 </template>
 
 <script>
-import mixin from "@directus/extension-toolkit/mixins/interface";
-import shortid from "shortid";
+import mixin from '@directus/extension-toolkit/mixins/interface';
+import shortid from 'shortid';
+import { isEqual, clone } from 'lodash';
 
 export default {
-	name: "InterfaceCheckboxes",
+	name: 'InterfaceCheckboxes',
 	mixins: [mixin],
 	data() {
 		return {
@@ -54,15 +55,15 @@ export default {
 				if (this.initialized !== true) return;
 				let newValue = val.filter(choice => choice.checked).map(choice => choice.key);
 
-				if (_.isEqual(this.value, newValue)) {
+				if (isEqual(this.value, newValue)) {
 					return;
 				}
 
 				if (this.options.wrap) {
-					newValue = ["", ...newValue, ""];
+					newValue = ['', ...newValue, ''];
 				}
 
-				this.$emit("input", newValue);
+				this.$emit('input', newValue);
 			}
 		}
 	},
@@ -71,7 +72,7 @@ export default {
 	},
 	methods: {
 		initChoices() {
-			const optionChoices = _.clone(this.options.choices || []);
+			const optionChoices = clone(this.options.choices || []);
 			const initialValues = this.value ? this.value : [];
 			let choices = initialValues
 				.filter(key => key) // filter out empty strings
@@ -116,7 +117,7 @@ export default {
 				...this.choices,
 				{
 					id: shortid.generate(),
-					key: "",
+					key: '',
 					custom: true,
 					checked: true
 				}
@@ -169,10 +170,5 @@ export default {
 	input::placeholder {
 		color: var(--blue-grey-300);
 	}
-}
-
-button {
-	text-align: left;
-	color: var(--accent);
 }
 </style>

@@ -24,7 +24,7 @@
       "name": "$t:palette",
       "comment": "$t:palette_comment",
       "interface": "tags",
-      "type": "ARRAY",
+      "type": "array",
       "options": {
         "wrapWithDelimiter": false
       },
@@ -36,7 +36,7 @@
     "paletteOnly": {
       "name": "$t:palette_only",
       "comment": "$t:palette_only_comment",
-      "interface": "toggle",
+      "interface": "switch",
       "default": false
     }
   }

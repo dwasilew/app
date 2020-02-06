@@ -21,6 +21,7 @@
 						:type="fields[title].type"
 						:options="fields[title].options"
 						:value="item[title]"
+						:values="item"
 						:relation="fields[title].relation"
 					/>
 				</template>
@@ -33,6 +34,7 @@
 						:type="fields[subtitle].type"
 						:options="fields[subtitle].options"
 						:value="item[subtitle]"
+						:values="item"
 						:relation="fields[subtitle].relation"
 					/>
 				</template>
@@ -53,14 +55,14 @@
 </template>
 
 <script>
-import mixin from "@directus/extension-toolkit/mixins/layout";
-import { mapState } from "vuex";
+import mixin from '@directus/extension-toolkit/mixins/layout';
+import { mapState } from 'vuex';
 
 export default {
-	name: "LayoutCards",
+	name: 'LayoutCards',
 	mixins: [mixin],
 	computed: {
-		...mapState(["currentProjectKey"]),
+		...mapState(['currentProjectKey']),
 		title() {
 			return this.viewOptions.title || this.primaryKeyField;
 		},
@@ -76,26 +78,27 @@ export default {
 			const srcField = this.viewOptions.src || null;
 
 			if (srcField) {
-				let privateHash = null;
+				const source = this.$store.state.settings.values.asset_url_naming;
+				let sourcePath = null;
 
-				if (this.fields[srcField] && this.fields[srcField].type.toLowerCase() === "file") {
-					privateHash = item[srcField]?.private_hash;
+				if (this.fields[srcField] && this.fields[srcField].type.toLowerCase() === 'file') {
+					sourcePath = item[srcField]?.[source];
 				}
 
-				if (srcField === "data" && this.fields[srcField].collection === "directus_files") {
-					if (item.type.startsWith("image") === false) return null;
+				if (srcField === 'data' && this.fields[srcField].collection === 'directus_files') {
+					if (item.type.startsWith('image') === false) return null;
 
-					if (item.type === "image/svg+xml") {
+					if (item.type === 'image/svg+xml') {
 						return item.data.url;
 					}
-					privateHash = item?.private_hash;
+					sourcePath = item?.[source];
 				}
 
-				if (!privateHash) return null;
+				if (!sourcePath) return null;
 
-				const fit = this.viewOptions.fit || "crop";
+				const fit = this.viewOptions.fit || 'crop';
 
-				return `/${this.currentProjectKey}/assets/${privateHash}?key=directus-medium-${fit}`;
+				return `/${this.currentProjectKey}/assets/${sourcePath}?key=directus-medium-${fit}`;
 			}
 
 			return null;
@@ -107,7 +110,7 @@ export default {
 			const { scrollHeight, clientHeight, scrollTop } = event.srcElement;
 			const totalScroll = scrollHeight - clientHeight;
 			const delta = totalScroll - scrollTop;
-			if (delta <= 500) this.$emit("next-page");
+			if (delta <= 500) this.$emit('next-page');
 			this.scrolled = scrollTop > 0;
 		},
 		select(id) {
@@ -119,7 +122,7 @@ export default {
 				newSelection = [...this.selection, id];
 			}
 
-			this.$emit("select", newSelection);
+			this.$emit('select', newSelection);
 		}
 	}
 };
@@ -196,5 +199,10 @@ export default {
 
 .layout-loading {
 	padding: 24px 0;
+	text-align: center;
+
+	.v-spinner {
+		display: inline-block;
+	}
 }
 </style>

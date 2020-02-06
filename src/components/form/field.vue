@@ -16,10 +16,10 @@
 					v-if="field.required === true"
 					class="required"
 					name="star"
-					color="input-required-color"
+					color="--input-required-color"
 					sup
 				/>
-				<v-icon name="arrow_drop_down" icon-style="outline" size="18" class="dropdown" />
+				<v-icon name="arrow_drop_down" icon-style="outline" small class="dropdown" />
 			</v-contextual-menu>
 			<span v-else class="field-static">
 				<span class="field-label">
@@ -29,16 +29,16 @@
 					v-if="field.required === true"
 					class="required"
 					name="star"
-					color="blue-grey-200"
+					color="--blue-grey-200"
 					sup
 				/>
 			</span>
-			<v-toggle
+			<v-switch
 				v-if="batchMode"
 				v-tooltip="$t('batch_edit_field')"
 				class="batch-toggle"
-				:value="!blocked"
-				@input="$emit(blocked ? 'activate' : 'deactivate', field.field)"
+				:inputValue="!blocked"
+				@change="$emit(blocked ? 'activate' : 'deactivate', field.field)"
 			/>
 		</div>
 
@@ -55,6 +55,7 @@
 				:relation="relation"
 				:fields="fields"
 				:collection="collection"
+				:primary-key="primaryKey"
 				:values="values"
 				:length="field.length"
 				:new-item="newItem"
@@ -79,7 +80,7 @@
 
 <script>
 export default {
-	name: "VField",
+	name: 'VField',
 	props: {
 		name: {
 			type: String,
@@ -101,6 +102,10 @@ export default {
 			type: String,
 			default: null
 		},
+		primaryKey: {
+			type: [String, Number],
+			default: null
+		},
 		blocked: {
 			type: Boolean,
 			default: false
@@ -117,7 +122,7 @@ export default {
 			type: String,
 			default: null,
 			validator(val) {
-				return ["half", "half-left", "half-right", "full", "fill"].includes(val);
+				return ['half', 'half-left', 'half-right', 'full', 'fill'].includes(val);
 			}
 		}
 	},
@@ -146,9 +151,9 @@ export default {
 		relation() {
 			const { collection, field, type } = this.field;
 
-			if (type.toLowerCase() === "m2o") return this.$store.getters.m2o(collection, field);
-			if (type.toLowerCase() === "o2m") return this.$store.getters.o2m(collection, field);
-			if (type.toLowerCase() === "translation")
+			if (type.toLowerCase() === 'm2o') return this.$store.getters.m2o(collection, field);
+			if (type.toLowerCase() === 'o2m') return this.$store.getters.o2m(collection, field);
+			if (type.toLowerCase() === 'translation')
 				return this.$store.getters.o2m(collection, field);
 			return null;
 		},
@@ -169,18 +174,18 @@ export default {
 		options() {
 			return {
 				setNull: {
-					text: this.$t("clear_value"),
-					icon: "delete_outline",
+					text: this.$t('clear_value'),
+					icon: 'delete_outline',
 					disabled: this.value === null
 				},
 				reset: {
-					text: this.$t("reset_to_default"),
-					icon: "settings_backup_restore",
+					text: this.$t('reset_to_default'),
+					icon: 'settings_backup_restore',
 					disabled: this.isDefault === true
 				},
 				clear: {
-					text: this.$t("undo_changes"),
-					icon: "undo",
+					text: this.$t('undo_changes'),
+					icon: 'undo',
 					disabled: this.isChanged === false
 				}
 			};
@@ -198,18 +203,18 @@ export default {
 			let value;
 
 			switch (action) {
-				case "setNull":
+				case 'setNull':
 					value = null;
 					break;
-				case "clear":
+				case 'clear':
 					value = this.initialValue;
 					break;
-				case "reset":
+				case 'reset':
 					value = this.field.default_value;
 					break;
 			}
 
-			this.$emit("stage-value", {
+			this.$emit('stage-value', {
 				field: this.field.field,
 				value: value
 			});
@@ -225,6 +230,8 @@ export default {
 
 .type-label {
 	margin-bottom: var(--input-label-margin);
+	display: flex;
+	align-items: center;
 }
 
 .required {
@@ -250,11 +257,5 @@ export default {
 		vertical-align: -2px;
 		opacity: 0;
 	}
-}
-
-.batch-toggle {
-	display: inline-block;
-	vertical-align: -5px;
-	transform: translate(-4px, 2px);
 }
 </style>

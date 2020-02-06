@@ -15,13 +15,14 @@
 </template>
 
 <script>
-import Day from "./Day.vue";
+import Day from './Day.vue';
+import { throttle } from 'lodash';
 
 export default {
 	components: {
 		Day
 	},
-	props: ["month", "items"],
+	props: ['month', 'items'],
 	data() {
 		return {
 			innerHeight: window.innerHeight
@@ -47,13 +48,13 @@ export default {
 		}
 	},
 	created() {
-		this.updateHeight = _.throttle(this.updateHeight, 100);
-		window.addEventListener("resize", () => {
+		this.updateHeight = throttle(this.updateHeight, 100);
+		window.addEventListener('resize', () => {
 			this.updateHeight();
 		});
 	},
 	destroyed() {
-		window.removeEventListener("resize", () => {
+		window.removeEventListener('resize', () => {
 			this.updateHeight();
 		});
 	},
@@ -71,7 +72,7 @@ export default {
 
 		renderWeek(index) {
 			if (index < 8) {
-				return this.$t("weeks." + this.$parent.weekNames[index - 1]);
+				return this.$t('weeks.' + this.$parent.weekNames[index - 1]);
 			} else {
 				return null;
 			}
@@ -100,11 +101,11 @@ export default {
 		 */
 		display(index) {
 			if (index < this.monthBegin || index >= this.monthBegin + this.monthLength) {
-				return "hidden";
+				return 'hidden';
 			} else if (this.month == 0 && index - this.monthBegin + 1 == this.today) {
-				return "today";
+				return 'today';
 			} else if (index - this.monthBegin < this.monthLength) {
-				return "default";
+				return 'default';
 			}
 		},
 		updateHeight() {

@@ -15,7 +15,7 @@
 			<div v-if="selectable" class="select cell">
 				<v-checkbox
 					id="select-all"
-					:checked="allSelected"
+					:inputValue="allSelected"
 					name="select-all"
 					value="all"
 					@change="selectAll"
@@ -42,8 +42,7 @@
 					}}
 					<v-icon
 						class="sort-icon"
-						color="input-border-color-hover"
-						size="24"
+						color="--input-border-color-hover"
 						name="sort"
 						:class="sortVal.asc ? 'asc' : 'desc'"
 					/>
@@ -109,8 +108,8 @@
 						<div v-if="selectable" class="cell select" @click.stop>
 							<v-checkbox
 								:id="'check-' + row[primaryKeyField]"
-								:value="row[primaryKeyField]"
-								:checked="selection.includes(row[primaryKeyField])"
+								:value="`${row[primaryKeyField]}`"
+								:inputValue="selection.includes(row[primaryKeyField])"
 								@change="toggleCheckbox(row[primaryKeyField])"
 							/>
 						</div>
@@ -122,11 +121,22 @@
 							}"
 							class="cell"
 						>
-							<div v-if="row[field] === '' || isNil(row[field])" class="empty">
+							<div
+								v-if="
+									(row[field] === '' || isNil(row[field])) &&
+										fieldInfo &&
+										fieldInfo.type.toLowerCase() !== 'alias'
+								"
+								class="empty"
+							>
 								--
 							</div>
 							<v-ext-display
-								v-else-if="useInterfaces && !isNil(row[field])"
+								v-else-if="
+									useInterfaces &&
+										(!isNil(row[field]) ||
+											(fieldInfo && fieldInfo.type.toLowerCase() === 'alias'))
+								"
 								:id="field"
 								:interface-type="fieldInfo.interface"
 								:name="field"
@@ -156,8 +166,8 @@
 						<div v-if="selectable" class="select" @click.stop>
 							<v-checkbox
 								:id="'check-' + row[primaryKeyField]"
-								:value="row[primaryKeyField]"
-								:checked="selection.includes(row[primaryKeyField])"
+								:value="`${row[primaryKeyField]}`"
+								:inputValue="selection.includes(row[primaryKeyField])"
 								@change="toggleCheckbox(row[primaryKeyField])"
 							/>
 						</div>
@@ -192,20 +202,18 @@
 		</div>
 		<transition name="fade">
 			<div v-if="lazyLoading" class="lazy-loader">
-				<v-spinner
-					line-fg-color="var(--blue-grey-300)"
-					line-bg-color="var(--blue-grey-200)"
-				/>
+				<v-spinner color="--blue-grey-300" background-color="--blue-grey-200" />
 			</div>
 		</transition>
 	</div>
 </template>
 
 <script>
-import isRelational from "@/helpers/is-relational";
+import isRelational from '@/helpers/is-relational';
+import { isObject, isEqual, isNil } from 'lodash';
 
 export default {
-	name: "VTable",
+	name: 'VTable',
 	props: {
 		loading: {
 			type: Boolean,
@@ -281,16 +289,16 @@ export default {
 			const primaryKeyFields = this.items.map(item => item[this.primaryKeyField]).sort();
 			const selection = [...this.selection];
 			selection.sort();
-			return this.selection.length > 0 && _.isEqual(primaryKeyFields, selection);
+			return this.selection.length > 0 && isEqual(primaryKeyFields, selection);
 		},
 		selectable() {
 			return Array.isArray(this.selection);
 		},
 		sortable() {
-			return _.isObject(this.sortVal);
+			return isObject(this.sortVal);
 		},
 		resizeable() {
-			return _.isObject(this.columnWidths);
+			return isObject(this.columnWidths);
 		},
 		totalWidth() {
 			return (
@@ -334,15 +342,15 @@ export default {
 	methods: {
 		isRelational: isRelational,
 		isNil(val) {
-			return _.isNil(val);
+			return isNil(val);
 		},
 		selectAll() {
 			if (this.allSelected) {
-				return this.$emit("select", []);
+				return this.$emit('select', []);
 			}
 
 			const primaryKeyFields = this.items.map(item => item[this.primaryKeyField]);
-			return this.$emit("select", primaryKeyFields);
+			return this.$emit('select', primaryKeyFields);
 		},
 		updateSort(field, direction) {
 			this.manualSorting = false;
@@ -350,17 +358,17 @@ export default {
 			if (direction) {
 				const newSortVal = {
 					field,
-					asc: direction === "asc"
+					asc: direction === 'asc'
 				};
-				return this.$emit("sort", newSortVal);
+				return this.$emit('sort', newSortVal);
 			}
 
 			const newSortVal = {
 				field,
-				asc: field === this.sortVal.field ? !this.sortVal.asc : "ASC"
+				asc: field === this.sortVal.field ? !this.sortVal.asc : 'ASC'
 			};
 
-			this.$emit("sort", newSortVal);
+			this.$emit('sort', newSortVal);
 		},
 		toggleCheckbox(primaryKeyField) {
 			const selection = [...this.selection];
@@ -371,7 +379,7 @@ export default {
 				selection.push(primaryKeyField);
 			}
 
-			this.$emit("select", selection);
+			this.$emit('select', selection);
 		},
 		drag(field, event) {
 			const { screenX } = event;
@@ -387,15 +395,15 @@ export default {
 		},
 		dragEnd() {
 			this.lastDragXPosition = 0;
-			this.$emit("widths", this.widths);
+			this.$emit('widths', this.widths);
 		},
 		hideDragImage(event) {
-			const img = document.createElement("img");
+			const img = document.createElement('img');
 			img.src =
-				"data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
+				'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
 			event.dataTransfer.setDragImage(img, 0, 0);
-			event.dataTransfer.effectAllowed = "move";
-			event.dataTransfer.setData("text/plain", null); //Just to enable/make the drag event to be triggered in the Firefox browser
+			event.dataTransfer.effectAllowed = 'move';
+			event.dataTransfer.setData('text/plain', null); //Just to enable/make the drag event to be triggered in the Firefox browser
 		},
 		initWidths() {
 			const widths = {};
@@ -411,7 +419,7 @@ export default {
 			const { scrollHeight, clientHeight, scrollTop } = event.srcElement;
 			const totalScroll = scrollHeight - clientHeight;
 			const delta = totalScroll - scrollTop;
-			if (delta <= 500) this.$emit("scroll-end");
+			if (delta <= 500) this.$emit('scroll-end');
 			this.scrolled = scrollTop > 0;
 		},
 		startManualSorting() {
@@ -420,7 +428,7 @@ export default {
 				return;
 			}
 
-			this.updateSort(this.manualSortField, "asc");
+			this.updateSort(this.manualSortField, 'asc');
 			this.manualSorting = true;
 		},
 		startSort() {
@@ -430,7 +438,7 @@ export default {
 			this.dragging = false;
 			if (this.itemsManuallySorted.some(row => row[this.manualSortField] == null)) {
 				return this.$emit(
-					"input",
+					'input',
 					this.itemsManuallySorted.map((row, i) => ({
 						[this.primaryKeyField]: row[this.primaryKeyField],
 						[this.manualSortField]: i + 1
@@ -439,7 +447,7 @@ export default {
 			}
 
 			return this.$emit(
-				"input",
+				'input',
 				this.itemsManuallySorted.map((row, i) => ({
 					[this.primaryKeyField]: row[this.primaryKeyField],
 					[this.manualSortField]: this.items[i][this.manualSortField]

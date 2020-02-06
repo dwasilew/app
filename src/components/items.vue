@@ -59,11 +59,13 @@
 </template>
 
 <script>
-import formatFilters from "../helpers/format-filters";
-import { mapState } from "vuex";
+import formatFilters from '../helpers/format-filters';
+import { mapState } from 'vuex';
+import getFieldsFromTemplate from '@/helpers/get-fields-from-template';
+import { isEqual, find, mapValues, uniq } from 'lodash';
 
 export default {
-	name: "VItems",
+	name: 'VItems',
 	props: {
 		collection: {
 			type: String,
@@ -75,11 +77,11 @@ export default {
 		},
 		searchQuery: {
 			type: String,
-			default: ""
+			default: ''
 		},
 		viewType: {
 			type: String,
-			default: "tabular"
+			default: 'tabular'
 		},
 		viewOptions: {
 			type: Object,
@@ -112,41 +114,41 @@ export default {
 		};
 	},
 	computed: {
-		...mapState(["currentProjectKey"]),
+		...mapState(['currentProjectKey']),
 		allSelected() {
 			const primaryKeys = this.items.data.map(item => item[this.primaryKeyField]).sort();
 			const selection = [...this.selection];
 			selection.sort();
-			return this.selection.length > 0 && _.isEqual(primaryKeys, selection);
+			return this.selection.length > 0 && isEqual(primaryKeys, selection);
 		},
 		primaryKeyField() {
 			if (!this.fields) return;
-			return _.find(Object.values(this.fields), {
+			return find(Object.values(this.fields), {
 				primary_key: true
 			}).field;
 		},
 		sortField() {
-			const field = _.find(this.fields, { type: "sort" });
+			const field = find(this.fields, { type: 'sort' });
 			return (field && field.field) || null;
 		},
 		statusField() {
-			const field = _.find(this.fields, { type: "status" });
+			const field = find(this.fields, { type: 'status' });
 			return (field && field.field) || null;
 		},
 		userCreatedField() {
 			if (!this.fields) return null;
 
 			return (
-				_.find(
+				find(
 					Object.values(this.fields),
-					field => field.type && field.type.toLowerCase() === "owner"
+					field => field.type && field.type.toLowerCase() === 'owner'
 				) || {}
 			).field;
 		},
 		fields() {
 			const fields = this.$store.state.collections[this.collection].fields;
 			return (
-				_.mapValues(fields, field => ({
+				mapValues(fields, field => ({
 					...field,
 					name: this.$helpers.formatField(field.field, field.collection)
 				})) || {}
@@ -154,30 +156,30 @@ export default {
 		},
 		selectionKeys() {
 			if (!this.selection) return null;
-			return _.uniq(this.selection.map(item => item[this.primaryKeyField]));
+			return uniq(this.selection.map(item => item[this.primaryKeyField]));
 		}
 	},
 	watch: {
 		collection(newVal, oldVal) {
-			if (_.isEqual(newVal, oldVal)) return;
+			if (isEqual(newVal, oldVal)) return;
 			this.hydrate();
 		},
 		viewQuery: {
 			deep: true,
 			handler(newVal, oldVal) {
-				if (_.isEqual(newVal, oldVal)) return;
+				if (isEqual(newVal, oldVal)) return;
 				this.getItems();
 			}
 		},
 		filters: {
 			deep: true,
 			handler(newVal, oldVal) {
-				if (_.isEqual(newVal, oldVal)) return;
+				if (isEqual(newVal, oldVal)) return;
 				this.getItems();
 			}
 		},
 		searchQuery(newVal, oldVal) {
-			if (_.isEqual(newVal, oldVal)) return;
+			if (isEqual(newVal, oldVal)) return;
 			this.getItems();
 		}
 	},
@@ -185,13 +187,13 @@ export default {
 		this.hydrate();
 	},
 	mounted() {
-		this.$helpers.mousetrap.bind("mod+a", () => {
+		this.$helpers.mousetrap.bind('mod+a', () => {
 			this.selectAll();
 			return false;
 		});
 	},
 	beforeDestroy() {
-		this.$helpers.mousetrap.unbind("mod+a");
+		this.$helpers.mousetrap.unbind('mod+a');
 	},
 	methods: {
 		hydrate() {
@@ -205,10 +207,10 @@ export default {
 		},
 		selectAll() {
 			if (this.allSelected) {
-				return this.$emit("select", []);
+				return this.$emit('select', []);
 			}
 
-			return this.$emit("select", this.items.data);
+			return this.$emit('select', this.items.data);
 		},
 		getItems() {
 			if (this.items.loading) return;
@@ -218,7 +220,7 @@ export default {
 			this.items.page = 0;
 
 			const id = this.$helpers.shortid.generate();
-			this.$store.dispatch("loadingStart", { id });
+			this.$store.dispatch('loadingStart', { id });
 
 			return this.$api
 				.getItems(this.collection, this.formatParams())
@@ -226,7 +228,7 @@ export default {
 					this.items.loading = false;
 					this.items.meta = res.meta;
 
-					this.$store.dispatch("loadingFinished", id);
+					this.$store.dispatch('loadingFinished', id);
 
 					if (this.links) {
 						this.items.data = res.data.map(item => {
@@ -234,13 +236,13 @@ export default {
 								item[this.primaryKeyField]
 							}`;
 
-							if (this.collection.startsWith("directus_")) {
+							if (this.collection.startsWith('directus_')) {
 								link = `/${this.currentProjectKey}/${this.collection.substr(9)}/${
 									item[this.primaryKeyField]
 								}`;
 							}
 
-							if (this.collection === "directus_webhooks") {
+							if (this.collection === 'directus_webhooks') {
 								link = `/${this.currentProjectKey}/settings/webhooks/${
 									item[this.primaryKeyField]
 								}`;
@@ -255,26 +257,26 @@ export default {
 						this.items.data = res.data;
 					}
 
-					this.$emit("fetch", {
+					this.$emit('fetch', {
 						...res.meta,
 						local_count: this.items.data.length
 					});
 				})
 				.catch(error => {
 					console.error(error); // eslint-disable-line no-console
-					this.$store.dispatch("loadingFinished", id);
+					this.$store.dispatch('loadingFinished', id);
 					this.items.loading = false;
 					this.items.error = error;
 				});
 		},
 		select(primaryKeys) {
 			this.$emit(
-				"select",
+				'select',
 				primaryKeys.map(key => {
 					return (
-						_.find(this.items.data, {
+						find(this.items.data, {
 							[this.primaryKeyField]: key
-						}) || _.find(this.selection, { [this.primaryKeyField]: key })
+						}) || find(this.selection, { [this.primaryKeyField]: key })
 					);
 				})
 			);
@@ -285,7 +287,7 @@ export default {
 			const pk = this.primaryKeyField;
 
 			const id = this.$helpers.shortid.generate();
-			this.$store.dispatch("loadingStart", { id });
+			this.$store.dispatch('loadingStart', { id });
 
 			/**
 			 * TODO: Document this somewhere nice
@@ -320,14 +322,14 @@ export default {
 					create.length > 0 ? this.$api.createItems(this.collection, create) : null
 				])
 					.then(() => {
-						this.$store.dispatch("loadingFinished", id);
+						this.$store.dispatch('loadingFinished', id);
 
 						return this.getItems();
 					})
 					.catch(error => {
-						this.$store.dispatch("loadingFinished", id);
-						this.$events.emit("error", {
-							notify: this.$t("something_went_wrong_body"),
+						this.$store.dispatch('loadingFinished', id);
+						this.$events.emit('error', {
+							notify: this.$t('something_went_wrong_body'),
 							error
 						});
 					});
@@ -336,13 +338,13 @@ export default {
 					return this.$api
 						.updateItem(this.collection, data[pk], data)
 						.then(() => {
-							this.$store.dispatch("loadingFinished", id);
+							this.$store.dispatch('loadingFinished', id);
 							return this.getItems();
 						})
 						.catch(error => {
-							this.$store.dispatch("loadingFinished", id);
-							this.$events.emit("error", {
-								notify: this.$t("something_went_wrong_body"),
+							this.$store.dispatch('loadingFinished', id);
+							this.$events.emit('error', {
+								notify: this.$t('something_went_wrong_body'),
 								error
 							});
 						});
@@ -350,13 +352,13 @@ export default {
 					return this.$api
 						.createItem(this.collection, data)
 						.then(() => {
-							this.$store.dispatch("loadingFinished", id);
+							this.$store.dispatch('loadingFinished', id);
 							return this.getItems();
 						})
 						.catch(error => {
-							this.$store.dispatch("loadingFinished", id);
-							this.$events.emit("error", {
-								notify: this.$t("something_went_wrong_body"),
+							this.$store.dispatch('loadingFinished', id);
+							this.$events.emit('error', {
+								notify: this.$t('something_went_wrong_body'),
 								error
 							});
 						});
@@ -387,7 +389,7 @@ export default {
 							...this.items.data,
 							...res.data.map(item => ({
 								...item,
-								__link__: this.collection.startsWith("directus_")
+								__link__: this.collection.startsWith('directus_')
 									? `/${this.collection.substr(9)}/${item[this.primaryKeyField]}`
 									: `/collections/${this.collection}/${
 											item[this.primaryKeyField]
@@ -398,7 +400,7 @@ export default {
 						this.items.data = [...this.items.data, ...res.data];
 					}
 
-					this.$emit("fetch", {
+					this.$emit('fetch', {
 						...res.meta,
 						local_count: this.items.data.length
 					});
@@ -414,7 +416,7 @@ export default {
 			const availableFields = Object.keys(this.fields);
 
 			let params = {
-				meta: "total_count,result_count",
+				meta: 'total_count,result_count',
 				limit: this.$store.state.settings.values.default_limit,
 				offset: this.$store.state.settings.values.default_limit * this.items.page
 			};
@@ -423,7 +425,7 @@ export default {
 
 			if (this.viewQuery && this.viewQuery.fields) {
 				if (params.fields instanceof Array == false)
-					params.fields = params.fields.split(",");
+					params.fields = params.fields.split(',');
 
 				// Make sure we don't try to fetch non-existing fields
 				params.fields = params.fields.filter(field => {
@@ -465,23 +467,23 @@ export default {
 					}
 				}
 
-				params.fields = params.fields.join(",");
+				params.fields = params.fields.join(',');
 			} else {
-				params.fields = "*.*";
+				params.fields = '*.*';
 			}
 
 			if (params.sort) {
-				const sortFields = params.sort.split(",");
+				const sortFields = params.sort.split(',');
 
 				params.sort = sortFields
 					.filter(field => {
-						if (field.startsWith("-")) {
+						if (field.startsWith('-')) {
 							field = field.substring(1);
 						}
 
 						return availableFields.includes(field);
 					})
-					.join(",");
+					.join(',');
 
 				if (params.sort.length === 0) delete params.sort;
 			}

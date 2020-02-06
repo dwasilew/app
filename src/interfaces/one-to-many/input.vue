@@ -1,18 +1,20 @@
 <template>
 	<div class="interface-one-to-many">
 		<v-notice v-if="relationshipSetup === false" color="warning" icon="warning">
-			{{ $t("relationship_not_setup") }}
+			{{ $t('relationship_not_setup') }}
 		</v-notice>
 
+		<v-spinner v-else-if="initialValue === null" />
+
 		<template v-else>
-			<div v-if="items.length" class="table">
+			<div v-if="items && items.length" class="table">
 				<div class="header">
 					<div class="row">
 						<button v-if="sortable" class="sort-column" @click="toggleManualSort">
 							<v-icon
 								name="sort"
-								size="18"
-								:color="manualSortActive ? 'action' : 'blue-grey-300'"
+								small
+								:color="manualSortActive ? '--action' : '--blue-grey-300'"
 							/>
 						</button>
 						<button
@@ -25,7 +27,7 @@
 							<v-icon
 								v-if="sort.field === field.field"
 								:name="sort.asc ? 'arrow_downward' : 'arrow_upward'"
-								size="16"
+								:size="16"
 							/>
 						</button>
 					</div>
@@ -70,6 +72,7 @@
 										? null
 										: item[field.field]
 								"
+								:values="item"
 							/>
 						</div>
 						<button
@@ -82,27 +85,27 @@
 					</div>
 				</draggable>
 			</div>
-			<v-notice v-else>{{ $t("no_items_selected") }}</v-notice>
+			<v-notice v-else>{{ $t('no_items_selected') }}</v-notice>
 
 			<div v-if="!readonly" class="buttons">
 				<v-button
 					v-if="options.allow_create"
 					type="button"
 					:disabled="readonly"
-					icon="add"
 					@click="startAddNewItem"
 				>
-					{{ $t("add_new") }}
+					<v-icon name="add" />
+					{{ $t('add_new') }}
 				</v-button>
 
 				<v-button
 					v-if="options.allow_select"
 					type="button"
 					:disabled="readonly"
-					icon="playlist_add"
 					@click="selectExisting = true"
 				>
-					{{ $t("select_existing") }}
+					<v-icon name="playlist_add" />
+					{{ $t('select_existing') }}
 				</v-button>
 			</div>
 		</template>
@@ -135,6 +138,7 @@
 						new-item
 						:fields="relatedCollectionFields"
 						:collection="relation.collection_many.collection"
+						:primary-key="editItem[relatedPrimaryKeyField] || '+'"
 						:values="editItem"
 						@stage-value="stageValue"
 					/>
@@ -145,12 +149,13 @@
 </template>
 
 <script>
-import mixin from "@directus/extension-toolkit/mixins/interface";
-import shortid from "shortid";
-import { diff } from "deep-object-diff";
+import mixin from '@directus/extension-toolkit/mixins/interface';
+import shortid from 'shortid';
+import { diff } from 'deep-object-diff';
+import { find, mapValues, clone, orderBy, cloneDeep, merge, forEach, difference } from 'lodash';
 
 export default {
-	name: "InterfaceOneToMany",
+	name: 'InterfaceOneToMany',
 	mixins: [mixin],
 	data() {
 		return {
@@ -169,7 +174,7 @@ export default {
 			loading: false,
 			error: null,
 			stagedSelection: null,
-			initialValue: _.cloneDeep(this.value) || []
+			initialValue: null
 		};
 	},
 
@@ -201,7 +206,7 @@ export default {
 				visibleFieldNames = this.options.fields.map(val => val.trim());
 			}
 
-			visibleFieldNames = this.options.fields.split(",").map(val => val.trim());
+			visibleFieldNames = this.options.fields.split(',').map(val => val.trim());
 
 			return visibleFieldNames.map(name => {
 				const fieldInfo = relatedFields[name];
@@ -212,15 +217,15 @@ export default {
 
 				let relation = null;
 
-				if (fieldInfo.type.toLowerCase() === "m2o") {
+				if (fieldInfo.type.toLowerCase() === 'm2o') {
 					relation = this.$store.getters.m2o(fieldInfo.collection, fieldInfo.field);
 				}
 
-				if (fieldInfo.type.toLowerCase() === "o2m") {
+				if (fieldInfo.type.toLowerCase() === 'o2m') {
 					relation = this.$store.getters.o2m(fieldInfo.collection, fieldInfo.field);
 				}
 
-				if (fieldInfo.type.toLowerCase() === "translation") {
+				if (fieldInfo.type.toLowerCase() === 'translation') {
 					relation = this.$store.getters.o2m(fieldInfo.collection, fieldInfo.field);
 				}
 
@@ -235,7 +240,7 @@ export default {
 		},
 
 		relatedPrimaryKeyField() {
-			return _.find(this.relation.collection_many.fields, { primary_key: true }).field;
+			return find(this.relation.collection_many.fields, { primary_key: true }).field;
 		},
 
 		selectionPrimaryKeys() {
@@ -249,7 +254,7 @@ export default {
 				return null;
 			}
 
-			return _.find(this.relation.collection_many.fields, { field: sortField });
+			return find(this.relation.collection_many.fields, { field: sortField });
 		},
 
 		sortable() {
@@ -257,7 +262,7 @@ export default {
 		},
 
 		manualSortActive() {
-			return this.sort.field === "$manual";
+			return this.sort.field === '$manual';
 		},
 
 		relatedCollectionFields() {
@@ -266,31 +271,31 @@ export default {
 			// Disable editing the many to one that points to this one to many
 			const manyToManyField = this.relation.field_many && this.relation.field_many.field;
 
-			return _.mapValues(relatedCollectionFields, field => {
-				const clone = _.clone(field);
+			return mapValues(relatedCollectionFields, field => {
+				const fieldClone = clone(field);
 
-				if (clone.field === manyToManyField) {
-					clone.readonly = true;
+				if (fieldClone.field === manyToManyField) {
+					fieldClone.readonly = true;
 				}
 
-				return clone;
+				return fieldClone;
 			});
 		},
 
 		itemsSorted: {
 			get() {
-				if (this.sort.field === "$manual") {
-					return _.orderBy(
-						_.cloneDeep(this.items),
+				if (this.sort.field === '$manual') {
+					return orderBy(
+						cloneDeep(this.items),
 						item => item[this.sortField.field],
-						this.sort.asc ? "asc" : "desc"
+						this.sort.asc ? 'asc' : 'desc'
 					);
 				}
 
-				return _.orderBy(
-					_.cloneDeep(this.items),
+				return orderBy(
+					cloneDeep(this.items),
 					item => item[this.sort.field],
-					this.sort.asc ? "asc" : "desc"
+					this.sort.asc ? 'asc' : 'desc'
 				);
 			},
 			set(newValue) {
@@ -311,19 +316,31 @@ export default {
 		}
 	},
 
-	created() {
+	async created() {
 		if (this.sortable) {
-			this.sort.field = "$manual";
+			this.sort.field = '$manual';
 		} else {
 			if (this.visibleFieldNames && this.visibleFieldNames.length > 0) {
 				this.sort.field = this.visibleFieldNames[0];
 			}
 		}
 
-		this.items = _.cloneDeep(this.value) || [];
+		await this.getInitialValue();
+
+		this.items = cloneDeep(this.initialValue) || [];
 	},
 
 	methods: {
+		async getInitialValue() {
+			const response = await this.$api.getItems(this.relation.collection_many.collection, {
+				fields: '*.*',
+				filter: {
+					[this.relation.field_many.field]: this.primaryKey
+				}
+			});
+
+			this.initialValue = response.data;
+		},
 		changeSort(fieldName) {
 			if (this.sort.field === fieldName) {
 				this.sort.asc = !this.sort.asc;
@@ -336,7 +353,7 @@ export default {
 		},
 
 		toggleManualSort() {
-			this.sort.field = "$manual";
+			this.sort.field = '$manual';
 			this.sort.asc = true;
 		},
 
@@ -344,9 +361,9 @@ export default {
 			this.addNew = true;
 
 			const relatedCollectionFields = this.relation.collection_many.fields;
-			const defaults = _.mapValues(relatedCollectionFields, field => field.default_value);
+			const defaults = mapValues(relatedCollectionFields, field => field.default_value);
 			const manyToManyField = this.relation.field_many && this.relation.field_many.field;
-			const tempKey = "$temp_" + shortid.generate();
+			const tempKey = '$temp_' + shortid.generate();
 
 			if (defaults.hasOwnProperty(this.relatedPrimaryKeyField)) {
 				delete defaults[this.relatedPrimaryKeyField];
@@ -372,18 +389,18 @@ export default {
 		},
 
 		async startEdit(primaryKey) {
-			let values = _.cloneDeep(
+			let values = cloneDeep(
 				this.items.find(i => i[this.relatedPrimaryKeyField] === primaryKey)
 			);
 
-			const isNewItem = typeof primaryKey === "string" && primaryKey.startsWith("$temp_");
+			const isNewItem = typeof primaryKey === 'string' && primaryKey.startsWith('$temp_');
 
 			if (isNewItem === false) {
 				const collection = this.relation.collection_many.collection;
-				const res = await this.$api.getItem(collection, primaryKey, { fields: "*.*.*" });
+				const res = await this.$api.getItem(collection, primaryKey, { fields: '*.*.*' });
 				const item = res.data;
 
-				values = _.merge({}, item, values);
+				values = merge({}, item, values);
 			}
 
 			this.editItem = values;
@@ -396,7 +413,7 @@ export default {
 
 			this.items = this.items.map(item => {
 				if (item[this.relatedPrimaryKeyField] === primaryKey) {
-					const edits = _.clone(this.editItem);
+					const edits = clone(this.editItem);
 
 					// Make sure we remove the many to one field that points to this o2m to prevent this nested item
 					// to be accidentally assigned to another parent
@@ -443,14 +460,14 @@ export default {
 
 			// Fetch all newly selected items so we can render them in the table
 			const itemPrimaryKeys = this.items.map(item => item[this.relatedPrimaryKeyField]);
-			const newlyAddedItems = _.difference(primaryKeys, itemPrimaryKeys);
+			const newlyAddedItems = difference(primaryKeys, itemPrimaryKeys);
 
 			if (newlyAddedItems.length > 0) {
 				const res = await this.$api.getItem(
 					this.relation.collection_many.collection,
-					newlyAddedItems.join(","),
+					newlyAddedItems.join(','),
 					{
-						fields: "*.*.*"
+						fields: '*.*.*'
 					}
 				);
 
@@ -474,7 +491,7 @@ export default {
 		},
 
 		emitValue(value) {
-			value = _.cloneDeep(value);
+			value = cloneDeep(value);
 
 			const recursiveKey = this.relation.field_many.field;
 
@@ -496,15 +513,19 @@ export default {
 						// only containing the changes.
 						// In order to achieve that, we'll loop over every key in the delta, and use the "full"
 						// after value in case the delta field is a JSON type
-						_.forEach(delta, (value, key) => {
+						forEach(delta, (value, key) => {
 							const fieldInfo = this.relatedCollectionFields[key];
 							if (!fieldInfo) return;
 
 							const type = fieldInfo.type.toLowerCase();
 
-							if (type === "json" || type === "translation" || type === "array") {
-								delta[key] = after[key];
-							} else if (type === "translation") {
+							if (
+								type === 'json' ||
+								type === 'translation' ||
+								type === 'array' ||
+								type === 'translation' ||
+								type === 'o2m'
+							) {
 								delta[key] = after[key];
 							}
 						});
@@ -521,7 +542,7 @@ export default {
 								delete newVal[recursiveKey];
 							}
 
-							return _.merge({}, newVal, delta);
+							return merge({}, newVal, delta);
 						} else {
 							return null;
 						}
@@ -532,8 +553,8 @@ export default {
 					}
 
 					if (
-						typeof after[this.relatedPrimaryKeyField] === "string" &&
-						after[this.relatedPrimaryKeyField].startsWith("$temp_")
+						typeof after[this.relatedPrimaryKeyField] === 'string' &&
+						after[this.relatedPrimaryKeyField].startsWith('$temp_')
 					) {
 						delete after[this.relatedPrimaryKeyField];
 					}
@@ -546,9 +567,9 @@ export default {
 				item => item[this.relatedPrimaryKeyField]
 			);
 			const newPrimaryKeys = value.map(item => item[this.relatedPrimaryKeyField]);
-			const deletedKeys = _.difference(savedPrimaryKeys, newPrimaryKeys);
+			const deletedKeys = difference(savedPrimaryKeys, newPrimaryKeys);
 			const deletedRows = deletedKeys.map(key => {
-				if (this.options.delete_mode === "relation") {
+				if (this.options.delete_mode === 'relation') {
 					return {
 						[this.relatedPrimaryKeyField]: key,
 						[recursiveKey]: null
@@ -560,7 +581,7 @@ export default {
 					$delete: true
 				};
 			});
-			this.$emit("input", [...newValue, ...deletedRows]);
+			this.$emit('input', [...newValue, ...deletedRows]);
 		}
 	}
 };

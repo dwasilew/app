@@ -2,7 +2,7 @@
 	<div class="v-simple-select">
 		<select ref="selectElement" :value="value" :disabled="disabled" @change="stageValue">
 			<option disabled :selected="value == null" value="">
-				{{ placeholder || "--" }}
+				{{ placeholder || '--' }}
 			</option>
 			<slot />
 		</select>
@@ -10,15 +10,17 @@
 			<template v-if="value">
 				{{ valueText }}
 			</template>
-			<span v-else class="placeholder">{{ placeholder || "--" }}</span>
+			<span v-else class="placeholder">{{ placeholder || '--' }}</span>
 			<v-icon class="icon" name="arrow_drop_down" />
 		</div>
 	</div>
 </template>
 
 <script>
+import { isEqual } from 'lodash';
+
 export default {
-	name: "VSimpleSelect",
+	name: 'VSimpleSelect',
 	props: {
 		value: {
 			type: String,
@@ -56,18 +58,18 @@ export default {
 	},
 	methods: {
 		stageValue(event) {
-			this.$emit("input", event.target.value);
+			this.$emit('input', event.target.value);
 		},
 		getValueNames() {
 			const selectElement = this.$refs.selectElement;
 			const valueNames = {};
-			const children = Array.from(selectElement.querySelectorAll("option"));
+			const children = Array.from(selectElement.querySelectorAll('option'));
 
 			children.forEach(element => {
 				valueNames[element.value.trim()] = element.innerText.trim();
 			});
 
-			if (!_.isEqual(valueNames, this.valueNames)) {
+			if (!isEqual(valueNames, this.valueNames)) {
 				this.valueNames = valueNames;
 			}
 		}

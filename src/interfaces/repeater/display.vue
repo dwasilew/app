@@ -9,20 +9,21 @@
 </template>
 
 <script>
-import mixin from "@directus/extension-toolkit/mixins/interface";
+import mixin from '@directus/extension-toolkit/mixins/interface';
+import { forEach } from 'lodash';
 
 export default {
-	name: "DisplayRepeater",
+	name: 'DisplayRepeater',
 	mixins: [mixin],
 	computed: {
 		itemCount() {
-			return this.$tc("item_count", (this.value || []).length, {
+			return this.$tc('item_count', (this.value || []).length, {
 				count: (this.value || []).length
 			});
 		},
 		menuOptions() {
 			const options = [];
-			_.forEach(this.value, value => {
+			forEach(this.value, value => {
 				options.push({
 					text: this.$helpers.micromustache.render(this.options.template, value)
 				});

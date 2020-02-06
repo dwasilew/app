@@ -11,34 +11,32 @@
 		<router-link slot="popover" class="popover" :to="`/${currentProjectKey}/users/${id}`">
 			<v-spinner v-if="loading" />
 			<template v-else-if="data">
-				<v-avatar
-					:src="data.avatar"
-					:alt="`${data.first_name} ${data.last_name}`"
-					class="avatar"
-					:size="64"
-				/>
+				<v-avatar x-large>
+					<img v-if="data.avatar" :src="data.avatar" />
+					<v-icon name="person" v-else />
+				</v-avatar>
 				<div class="info">
 					<div class="primary type-label">{{ data.first_name }} {{ data.last_name }}</div>
 					<div class="secondary">
 						<!-- <v-icon class="icon" name="flag" size="16" /> -->
-						{{ data.title || "No Title" }}
+						{{ data.title || 'No Title' }}
 					</div>
 					<div class="secondary">
 						<!-- <v-icon class="icon" name="room" size="16" /> -->
-						{{ data.company || "No Company" }}
+						{{ data.company || 'No Company' }}
 					</div>
 				</div>
-				<v-icon class="arrow" color="input-icon-color" name="open_in_new" size="24" />
+				<v-icon class="arrow" color="--input-icon-color" name="open_in_new" />
 			</template>
 		</router-link>
 	</v-popover>
 </template>
 
 <script>
-import { mapState } from "vuex";
+import { mapState } from 'vuex';
 
 export default {
-	name: "UserPopover",
+	name: 'UserPopover',
 	props: {
 		id: {
 			type: Number,
@@ -48,24 +46,24 @@ export default {
 			type: String,
 			validator(value) {
 				return [
-					"auto",
-					"auto-start",
-					"auto-end",
-					"top",
-					"top-start",
-					"top-end",
-					"right",
-					"right-start",
-					"right-end",
-					"bottom",
-					"bottom-start",
-					"bottom-end",
-					"left",
-					"left-start",
-					"left-end"
+					'auto',
+					'auto-start',
+					'auto-end',
+					'top',
+					'top-start',
+					'top-end',
+					'right',
+					'right-start',
+					'right-end',
+					'bottom',
+					'bottom-start',
+					'bottom-end',
+					'left',
+					'left-start',
+					'left-end'
 				].includes(value);
 			},
-			default: "top"
+			default: 'top'
 		}
 	},
 	data() {
@@ -76,7 +74,7 @@ export default {
 		};
 	},
 	computed: {
-		...mapState(["currentProjectKey"]),
+		...mapState(['currentProjectKey']),
 		boundariesElement() {
 			return document.body;
 		}
@@ -89,12 +87,12 @@ export default {
 			try {
 				let { data } = await this.$api.getUser(this.id, {
 					fields: [
-						"avatar.data.thumbnails",
-						"first_name",
-						"last_name",
-						"title",
-						"company",
-						"role.name"
+						'avatar.data.thumbnails',
+						'first_name',
+						'last_name',
+						'title',
+						'company',
+						'role.name'
 					]
 				});
 				data.role = data.role?.name;
@@ -128,7 +126,7 @@ export default {
 	text-decoration: none;
 	// This fills the gap between the target and popover, so it doesn't lose focus on hover
 	&:before {
-		content: "";
+		content: '';
 		position: absolute;
 		top: 100%;
 		bottom: -12px;
@@ -140,8 +138,6 @@ export default {
 	}
 	.avatar {
 		margin-right: 12px;
-		border-radius: var(--border-radius);
-		overflow: hidden;
 	}
 	.info {
 		line-height: 1.4;

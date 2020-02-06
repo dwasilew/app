@@ -15,7 +15,7 @@
 			/>
 
 			<button type="submit" :disabled="comment.trim().length === 0">
-				{{ $t("submit") }}
+				{{ $t('submit') }}
 			</button>
 		</form>
 
@@ -50,7 +50,7 @@
 							v-tooltip="'Revision Details'"
 							class="chevron"
 							name="chevron_left"
-							size="18"
+							small
 						/>
 					</summary>
 					<div v-if="activity.changes">
@@ -94,12 +94,13 @@
 </template>
 
 <script>
-import VDiff from "./diff.vue";
-import { diff } from "deep-object-diff";
-import Mousetrap from "mousetrap";
+import VDiff from './diff.vue';
+import { diff } from 'deep-object-diff';
+import Mousetrap from 'mousetrap';
+import { mapValues, clone } from 'lodash';
 
 export default {
-	name: "VActivity",
+	name: 'VActivity',
 	components: {
 		VDiff
 	},
@@ -118,12 +119,12 @@ export default {
 		},
 		commentPermission: {
 			type: String,
-			default: "none"
+			default: 'none'
 		}
 	},
 	data() {
 		return {
-			comment: ""
+			comment: ''
 		};
 	},
 	computed: {
@@ -139,18 +140,18 @@ export default {
 
 			if (!lastItem) {
 				activityWithChanges.push({
-					action: "external",
-					comment: this.$t("activity_outside_directus"),
+					action: 'external',
+					comment: this.$t('activity_outside_directus'),
 					id: -1
 				});
 			} else {
-				const create = lastItem.action.toLowerCase() === "create";
-				const upload = lastItem.action.toLowerCase() === "upload";
+				const create = lastItem.action.toLowerCase() === 'create';
+				const upload = lastItem.action.toLowerCase() === 'upload';
 
 				if (!create && !upload) {
 					activityWithChanges.push({
-						action: "external",
-						comment: this.$t("activity_outside_directus"),
+						action: 'external',
+						comment: this.$t('activity_outside_directus'),
 						id: -1
 					});
 				}
@@ -159,27 +160,27 @@ export default {
 			return activityWithChanges.map(activity => ({
 				...activity,
 				htmlcomment: this.$helpers.snarkdown(
-					(activity.comment || "")
+					(activity.comment || '')
 						// Remove headings because they're ugly basically
-						.replace(/#/g, "")
+						.replace(/#/g, '')
 						// Cleanup the comment, and escape HTML chars in order to prevent
 						// XSS style problems
-						.replace(/&/g, "&amp;")
-						.replace(/</g, "&lt;")
-						.replace(/>/g, "&gt;")
-						.replace(/"/g, "&quot;")
-						.replace(/'/g, "&#039;") || ""
+						.replace(/&/g, '&amp;')
+						.replace(/</g, '&lt;')
+						.replace(/>/g, '&gt;')
+						.replace(/"/g, '&quot;')
+						.replace(/'/g, '&#039;') || ''
 				)
 			}));
 		}
 	},
 	mounted() {
-		this.mousetrap = new Mousetrap(this.$refs.commentArea).bind("mod+enter", () => {
+		this.mousetrap = new Mousetrap(this.$refs.commentArea).bind('mod+enter', () => {
 			this.postComment();
 		});
 	},
 	beforeDestroy() {
-		this.mousetrap.unbind("mod+enter");
+		this.mousetrap.unbind('mod+enter');
 	},
 	methods: {
 		getChanges(activityID, index) {
@@ -191,9 +192,9 @@ export default {
 
 			for (let i = index + 1; i < this.activity.length; i++) {
 				if (
-					this.activity[i].action === "update" ||
-					this.activity[i].action === "create" ||
-					this.activity[i].action === "upload"
+					this.activity[i].action === 'update' ||
+					this.activity[i].action === 'create' ||
+					this.activity[i].action === 'upload'
 				) {
 					previousUpdate = this.activity[i];
 					break;
@@ -201,10 +202,10 @@ export default {
 			}
 
 			if (!previousUpdate) {
-				if (this.activity[index].action === "create") {
+				if (this.activity[index].action === 'create') {
 					const data = revision.data;
 
-					return _.mapValues(data, (value, field) => ({
+					return mapValues(data, (value, field) => ({
 						before: null,
 						after: value,
 						field: field
@@ -220,13 +221,13 @@ export default {
 			const currentDelta = revision.delta;
 
 			// The API will save the delta no matter if it actually changed or not
-			const localDelta = diff(_.clone(previousData), _.clone(currentData));
+			const localDelta = diff(clone(previousData), clone(currentData));
 
 			const hasChanged = Object.keys(localDelta).length > 0;
 
 			if (hasChanged === false) return null;
 
-			return _.mapValues(currentDelta, (value, field) => ({
+			return mapValues(currentDelta, (value, field) => ({
 				before: previousData[field],
 				after: value,
 				field
@@ -236,8 +237,8 @@ export default {
 			// Don't post an empty comment
 			if (this.comment.length === 0) return;
 
-			this.$emit("input", this.comment);
-			this.comment = "";
+			this.$emit('input', this.comment);
+			this.comment = '';
 		}
 	}
 };
@@ -248,7 +249,7 @@ export default {
 	position: relative;
 
 	&::before {
-		content: "";
+		content: '';
 		position: absolute;
 		left: 0px;
 		top: 80px;
@@ -374,7 +375,7 @@ export default {
 			width: 100%;
 
 			&:before {
-				content: "";
+				content: '';
 				position: absolute;
 				top: -6px;
 				left: 10px;
@@ -444,13 +445,13 @@ export default {
 		font-weight: 600;
 	}
 	code {
-		font-family: "Roboto Mono";
+		font-family: 'Roboto Mono';
 		background-color: var(--sidebar-background-color);
 		padding: 2px 2px;
 		border-radius: var(--border-radius);
 	}
 	pre {
-		font-family: "Roboto Mono";
+		font-family: 'Roboto Mono';
 		background-color: var(--sidebar-background-color);
 		padding: 4px 8px;
 		border-radius: var(--border-radius);

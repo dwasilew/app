@@ -28,8 +28,9 @@
 </template>
 
 <script>
-import Color from "color";
-import shortid from "shortid";
+import Color from 'color';
+import shortid from 'shortid';
+import { clone } from 'lodash';
 
 export default {
 	props: {
@@ -40,7 +41,7 @@ export default {
 		format: {
 			type: String,
 			required: true,
-			default: "rbg"
+			default: 'rbg'
 		}
 	},
 	computed: {
@@ -56,9 +57,9 @@ export default {
 	},
 	methods: {
 		emitValue(index, $event) {
-			const values = _.clone(this.values);
+			const values = clone(this.values);
 			values[index] = $event;
-			this.$emit("input", new Color[this.format](values).hex());
+			this.$emit('input', new Color[this.format](values).hex());
 		}
 	}
 };

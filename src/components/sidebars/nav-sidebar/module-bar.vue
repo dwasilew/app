@@ -17,7 +17,7 @@
 				<v-icon
 					class="icon"
 					:name="singleModule.icon || 'box'"
-					:color="singleModule.color || 'blue-grey-400'"
+					:color="`--${singleModule.color || 'blue-grey-400'}`"
 				/>
 			</a>
 			<router-link
@@ -34,7 +34,7 @@
 				<v-icon
 					class="icon"
 					:name="singleModule.icon || 'box'"
-					:color="singleModule.color || 'blue-grey-400'"
+					:color="`--${singleModule.color || 'blue-grey-400'}`"
 				/>
 			</router-link>
 		</template>
@@ -50,18 +50,10 @@
 			:class="{ smoke: avatarURL }"
 			:to="`/${currentProjectKey}/users/${currentUser.id}`"
 		>
-			<v-avatar
-				v-if="avatarURL"
-				:src="avatarURL"
-				:alt="fullName"
-				:size="64"
-				class="avatar"
-				background-color="module-background-color-active"
-				hover
-			/>
-			<div class="no-avatar">
-				<v-icon name="person" color="blue-grey-400" />
-			</div>
+			<v-avatar x-large tile color="--module-background-color-active">
+				<img v-if="avatarURL" :src="avatarURL" />
+				<v-icon v-else name="person" color="--blue-grey-400" />
+			</v-avatar>
 		</router-link>
 
 		<button
@@ -73,7 +65,7 @@
 			type="button"
 			@click="confirmSignOut = true"
 		>
-			<v-icon name="logout" color="blue-grey-400" />
+			<v-icon name="logout" color="--blue-grey-400" />
 		</button>
 
 		<portal v-if="confirmSignOut" to="modal">
@@ -89,12 +81,13 @@
 </template>
 
 <script>
-import VLogo from "./logo";
-import { mapState, mapGetters } from "vuex";
-import { UPDATE_PROJECT, RESET } from "@/store/mutation-types";
+import VLogo from './logo';
+import { mapState, mapGetters } from 'vuex';
+import { UPDATE_PROJECT, RESET } from '@/store/mutation-types';
+import { clone, forEach } from 'lodash';
 
 export default {
-	name: "ModuleBar",
+	name: 'ModuleBar',
 	components: {
 		VLogo
 	},
@@ -105,8 +98,8 @@ export default {
 		};
 	},
 	computed: {
-		...mapState(["permissions", "currentUser", "currentProjectKey"]),
-		...mapGetters(["editing"]),
+		...mapState(['permissions', 'currentUser', 'currentProjectKey']),
+		...mapGetters(['editing']),
 		modules() {
 			let modules = [];
 
@@ -114,7 +107,7 @@ export default {
 				Array.isArray(this.currentUser.role?.module_listing) &&
 				this.currentUser.role?.module_listing.length > 0
 			) {
-				modules = _.clone(this.currentUser.role.module_listing);
+				modules = clone(this.currentUser.role.module_listing);
 			} else {
 				modules = this.getDefaultModules();
 			}
@@ -122,9 +115,9 @@ export default {
 			if (this.$store.state.currentUser.admin === true) {
 				modules.push({
 					link: `/${this.currentProjectKey}/settings`,
-					name: this.$t("admin_settings"),
-					icon: "settings",
-					class: "settings"
+					name: this.$t('admin_settings'),
+					icon: 'settings',
+					class: 'settings'
 				});
 			}
 
@@ -150,8 +143,8 @@ export default {
 			});
 
 			this.$store.commit(RESET);
-			await this.$store.dispatch("getProjects");
-			this.$router.push("/login");
+			await this.$store.dispatch('getProjects');
+			this.$router.push('/login');
 			this.confirmSignOutLoading = false;
 		},
 
@@ -160,38 +153,38 @@ export default {
 
 			modules.push({
 				link: `/${this.currentProjectKey}/collections`,
-				name: this.$tc("collection", 2),
-				icon: "box"
+				name: this.$tc('collection', 2),
+				icon: 'box'
 			});
 
 			if (
-				this.permissions.directus_users.read !== "none" ||
-				this.permissions.directus_users.read !== "mine"
+				this.permissions.directus_users.read !== 'none' ||
+				this.permissions.directus_users.read !== 'mine'
 			) {
 				modules.push({
 					link: `/${this.currentProjectKey}/users`,
-					name: this.$t("user_directory"),
-					icon: "people"
+					name: this.$t('user_directory'),
+					icon: 'people'
 				});
 			}
 
-			if (this.permissions.directus_files.read !== "none") {
+			if (this.permissions.directus_files.read !== 'none') {
 				modules.push({
 					link: `/${this.currentProjectKey}/files`,
-					name: this.$t("file_library"),
-					icon: "collections"
+					name: this.$t('file_library'),
+					icon: 'collections'
 				});
 			}
 
 			modules.push({
-				link: "https://docs.directus.io",
-				name: this.$t("help_and_docs"),
-				icon: "help"
+				link: 'https://docs.directus.io',
+				name: this.$t('help_and_docs'),
+				icon: 'help'
 			});
 
 			const moduleExtensions = this.$store.state.extensions.modules;
 
-			_.forEach(moduleExtensions, (info, key) => {
+			forEach(moduleExtensions, (info, key) => {
 				modules.push({
 					link: `/${this.currentProjectKey}/ext/${key}`,
 					name: info.name,
@@ -264,15 +257,6 @@ export default {
 	flex-grow: 1;
 }
 
-.no-avatar {
-	width: 64px;
-	height: 64px;
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	background-color: var(--module-background-color-active);
-}
-
 .edit-user {
 	width: 64px;
 	height: 64px;
@@ -289,7 +273,7 @@ export default {
 			left: 0;
 			width: 100%;
 			height: 100%;
-			content: "";
+			content: '';
 			background-color: var(--module-background-color);
 			opacity: 0.5;
 			z-index: 1;

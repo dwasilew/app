@@ -28,18 +28,13 @@
 				:cy="radius"
 			/>
 		</svg>
-		<v-icon
-			v-if="icon"
-			class="material-icons"
-			:style="{ fontSize: iconSize, color: `var(--${color})` }"
-			:name="icon"
-		/>
+		<v-icon v-if="icon" :size="iconSize" :color="`--${color}`" :name="icon" />
 	</div>
 </template>
 
 <script>
 export default {
-	name: "VProgressRing",
+	name: 'VProgressRing',
 	props: {
 		radius: {
 			type: Number,
@@ -58,7 +53,7 @@ export default {
 		},
 		color: {
 			type: String,
-			default: "blue-grey-600"
+			default: 'blue-grey-600'
 		},
 		icon: {
 			type: String,
@@ -80,7 +75,7 @@ export default {
 		},
 		iconSize() {
 			// Material design icons should be rendered in increments of 6 for visual clarity
-			return 6 * Math.round(this.radius / 6) + "px";
+			return 6 * Math.round(this.radius / 6) + 'px';
 		}
 	}
 };
@@ -101,7 +96,7 @@ export default {
 		opacity: 0.2;
 	}
 
-	i {
+	> *:not(svg) {
 		position: absolute;
 		top: 50%;
 		left: 0;

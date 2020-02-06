@@ -4,21 +4,25 @@
 			v-if="props.loading"
 			:size="20"
 			:line-size="2"
-			line-fg-color="var(--blue-grey)"
-			line-bg-color="var(--blue-grey-100)"
+			color="--blue-grey"
+			background-color="--blue-grey-100"
 		/>
-		<v-icon v-if="!props.loading && props.icon" :name="props.icon" :color="props.color" />
+		<v-icon
+			v-if="!props.loading && props.icon"
+			:name="props.icon"
+			:color="`--${props.color}`"
+		/>
 		<span class="copy"><slot /></span>
 	</span>
 </template>
 
 <script>
 export default {
-	name: "PublicNotice",
+	name: 'PublicNotice',
 	props: {
 		color: {
 			type: String,
-			default: "blue-grey"
+			default: 'blue-grey'
 		},
 		icon: {
 			type: String,

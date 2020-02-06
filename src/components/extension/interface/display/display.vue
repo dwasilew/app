@@ -18,22 +18,23 @@
 </template>
 
 <script>
-import Vue from "vue";
-import loadExtension from "../../../../helpers/load-extension";
-import componentExists from "../../../../helpers/component-exists";
-import VExtDisplayFallback from "./display-fallback.vue";
-import VExtDisplayLoading from "./display-loading.vue";
-import { datatypes } from "../../../../type-map";
+import Vue from 'vue';
+import loadExtension from '../../../../helpers/load-extension';
+import componentExists from '../../../../helpers/component-exists';
+import VExtDisplayFallback from './display-fallback.vue';
+import VExtDisplayLoading from './display-loading.vue';
+import { datatypes } from '../../../../type-map';
+import { mapValues } from 'lodash';
 
 export default {
-	name: "VExtDisplay",
+	name: 'VExtDisplay',
 	components: {
 		VExtDisplayFallback
 	},
 	props: {
 		interfaceType: {
 			type: String,
-			default: "text-input"
+			default: 'text-input'
 		},
 		name: {
 			type: String,
@@ -104,7 +105,7 @@ export default {
 		},
 		interfaceFallback() {
 			// Default to text-input if all else fails
-			if (this.datatype == null) return this.interfaces["text-input"];
+			if (this.datatype == null) return this.interfaces['text-input'];
 
 			// Lookup the raw db datatype based on the current vendor in the type-map
 			// to extract the fallback interface to use.
@@ -115,7 +116,7 @@ export default {
 		optionsWithDefaults() {
 			if (!this.interfaceInfo) return {};
 
-			const defaults = _.mapValues(
+			const defaults = mapValues(
 				this.interfaceInfo.options,
 				settings => settings.default || null
 			);
@@ -147,11 +148,11 @@ export default {
 			if (!this.interfaceInfo) {
 				component = VExtDisplayFallback;
 			} else if (this.interfaceInfo.core) {
-				component = import("@/interfaces/" + this.interfaceInfo.id + "/display.vue");
+				component = import('@/interfaces/' + this.interfaceInfo.id + '/display.vue');
 			} else {
 				const filePath = `${this.$store.state.apiRootPath}${this.interfaceInfo.path.replace(
-					"meta.json",
-					"display.js"
+					'meta.json',
+					'display.js'
 				)}`;
 
 				component = loadExtension(filePath);

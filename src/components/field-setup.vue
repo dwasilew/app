@@ -10,10 +10,10 @@
 	>
 		<template slot="interface">
 			<h1 v-if="!existing" class="type-heading-medium">
-				{{ $t("field_setup_interface") }}
+				{{ $t('field_setup_interface') }}
 			</h1>
 			<v-notice v-if="interfaceName" color="gray" class="currently-selected">
-				{{ $t("currently_selected", { thing: interfaces[interfaceName].name }) }}
+				{{ $t('currently_selected', { thing: interfaces[interfaceName].name }) }}
 			</v-notice>
 			<v-input
 				v-else
@@ -40,7 +40,7 @@
 							@click="setInterface(ext.id)"
 						>
 							<div class="header">
-								<v-icon :name="ext.icon || 'category'" size="48" color="white" />
+								<v-icon :name="ext.icon || 'category'" x-large color="--white" />
 							</div>
 							<div class="body">
 								<h2>{{ ext.name }}</h2>
@@ -60,7 +60,7 @@
 						@click="setInterface(ext.id)"
 					>
 						<div class="header">
-							<v-icon :name="ext.icon || 'category'" size="48" color="white" />
+							<v-icon :name="ext.icon || 'category'" x-large color="--white" />
 						</div>
 						<div class="body">
 							<h2>{{ ext.name }}</h2>
@@ -73,12 +73,12 @@
 
 		<template v-if="interfaceName" slot="schema">
 			<h1 v-if="!existing" class="type-heading-medium">
-				{{ $t("field_setup_schema") }}
+				{{ $t('field_setup_schema') }}
 			</h1>
 			<form class="schema" @submit.prevent>
 				<div class="name">
 					<label>
-						<span class="type-label">{{ $t("name") }}</span>
+						<span class="type-label">{{ $t('name') }}</span>
 						<v-icon class="required" name="star" color="input-required-color" sup />
 						<v-input
 							autofocus
@@ -93,12 +93,12 @@
 							@input="field = slug($event, { replacement: '_', lower: true }).trim()"
 						/>
 						<p class="type-note">
-							{{ $t("display_name") }}:
-							<b>{{ $helpers.formatTitle(field || "...") }}</b>
+							{{ $t('display_name') }}:
+							<b>{{ $helpers.formatTitle(field || '...') }}</b>
 						</p>
 					</label>
 					<label>
-						<span class="type-label">{{ $t("default_value") }}</span>
+						<span class="type-label">{{ $t('default_value') }}</span>
 						<v-input
 							v-model="default_value"
 							type="text"
@@ -108,29 +108,25 @@
 					</label>
 				</div>
 				<label>
-					<span class="type-label">{{ $t("note") }}</span>
+					<span class="type-label">{{ $t('note') }}</span>
 					<v-input v-model="note" type="text" :placeholder="$t('add_note')" />
 				</label>
 
 				<div class="toggles">
-					<label class="toggle">
-						<v-toggle
-							v-model="required"
-							:disabled="fieldInfo.primary_key || type === 'alias'"
-						/>
-						{{ $t("required") }}
-					</label>
-					<label class="toggle">
-						<v-toggle v-model="readonly" />
-						{{ $t("readonly") }}
-					</label>
+					<v-switch
+						v-model="required"
+						:disabled="fieldInfo.primary_key || type === 'alias'"
+						:label="$t('required')"
+					/>
+
+					<v-switch v-model="readonly" :label="$t('readonly')" />
 				</div>
 
 				<details class="advanced" :open="existing">
-					<summary>{{ $t("advanced_options") }}</summary>
+					<summary>{{ $t('advanced_options') }}</summary>
 					<div class="advanced-form">
 						<label>
-							<span class="type-label">{{ $t("field_type") }}</span>
+							<span class="type-label">{{ $t('field_type') }}</span>
 							<v-simple-select v-model="type">
 								<option
 									v-for="typeOption in availableFieldTypes"
@@ -146,7 +142,7 @@
 						<label>
 							<span class="type-label">
 								{{
-									$t("db_datatype", {
+									$t('db_datatype', {
 										db: $helpers.formatTitle(databaseVendor)
 									})
 								}}
@@ -166,7 +162,7 @@
 							</small>
 						</label>
 						<label>
-							<span class="type-label">{{ $t("length") }}</span>
+							<span class="type-label">{{ $t('length') }}</span>
 							<v-input
 								:type="
 									selectedDatatypeInfo && selectedDatatypeInfo.decimal
@@ -182,35 +178,22 @@
 							/>
 						</label>
 						<label>
-							<span class="type-label">{{ $t("validation") }}</span>
+							<span class="type-label">{{ $t('validation') }}</span>
 							<v-input v-model="validation" type="text" :placeholder="$t('regex')" />
 						</label>
-						<label
-							v-tooltip="primaryKeyTooltip"
-							class="toggle"
-							:class="{ disabled: primaryKeyDisabled }"
-						>
-							<v-toggle v-model="primary_key" :disabled="primaryKeyDisabled" />
-							{{ $t("primary_key") }}
-						</label>
-						<label class="toggle">
-							<v-toggle v-model="unique" />
-							{{ $t("unique") }}
-						</label>
-						<label class="toggle">
-							<v-toggle v-model="hidden_detail" />
-							{{ $t("hidden_detail") }}
-						</label>
-						<label class="toggle">
-							<v-toggle v-model="hidden_browse" />
-							{{ $t("hidden_browse") }}
-						</label>
-						<label v-if="isNumeric" class="toggle">
-							<v-toggle v-model="signed" />
-							{{ $t("signed") }}
-						</label>
+
+						<v-switch
+							v-model="primary_key"
+							:disabled="primaryKeyDisabled"
+							:label="$t('primary_key')"
+						/>
+						<v-switch v-model="unique" :label="$t('unique')" />
+						<v-switch v-model="hidden_detail" :label="$t('hidden_detail')" />
+						<v-switch v-model="hidden_browse" :label="$t('hidden_browse')" />
+						<v-switch v-model="signed" :label="$t('signed')" />
+
 						<label class="translation">
-							<span class="type-label">{{ $t("translation") }}</span>
+							<span class="type-label">{{ $t('translation') }}</span>
 							<v-ext-input
 								id="repeater"
 								v-model="translation"
@@ -248,11 +231,11 @@
 
 		<template v-if="selectedInterfaceInfo && relation" slot="relation">
 			<h1 v-if="!existing" class="type-heading-medium">
-				{{ $t("field_setup_relation") }}
+				{{ $t('field_setup_relation') }}
 			</h1>
 
 			<form v-if="relation === 'm2o'" class="single">
-				<span class="type-label">{{ $t("this_collection") }}</span>
+				<span class="type-label">{{ $t('this_collection') }}</span>
 
 				<v-simple-select class="select" :value="relationInfo.collection_many" disabled>
 					<option selected :value="collectionInfo.collection">
@@ -266,7 +249,7 @@
 
 				<v-icon name="arrow_backward" />
 
-				<span class="type-label">{{ $t("related_collection") }}</span>
+				<span class="type-label">{{ $t('related_collection') }}</span>
 
 				<v-simple-select v-model="relationInfo.collection_one" class="select">
 					<optgroup :label="$tc('collection', 2)">
@@ -304,7 +287,7 @@
 			</form>
 
 			<form v-if="relation === 'o2m'" class="single">
-				<span class="type-label">{{ $t("this_collection") }}</span>
+				<span class="type-label">{{ $t('this_collection') }}</span>
 
 				<v-simple-select class="select" :value="collectionInfo.collection" disabled>
 					<option selected :value="collectionInfo.collection">
@@ -318,9 +301,9 @@
 					</option>
 				</v-simple-select>
 
-				<v-icon name="arrow_forward" size="24" />
+				<v-icon name="arrow_forward" />
 
-				<span class="type-label">{{ $t("related_collection") }}</span>
+				<span class="type-label">{{ $t('related_collection') }}</span>
 
 				<v-simple-select v-model="relationInfo.collection_many" class="select">
 					<optgroup :label="$tc('collection', 2)">
@@ -355,7 +338,7 @@
 			</form>
 
 			<form v-if="relation === 'm2m'" class="full">
-				<p class="type-label">{{ $t("this_collection") }}</p>
+				<p class="type-label">{{ $t('this_collection') }}</p>
 
 				<v-simple-select class="select" :value="collectionInfo.collection" disabled>
 					<option selected :value="collectionInfo.collection">
@@ -369,9 +352,9 @@
 					</option>
 				</v-simple-select>
 
-				<v-icon name="arrow_forward" size="24" />
+				<v-icon name="arrow_forward" />
 
-				<p class="type-label">{{ $t("junction_collection") }}</p>
+				<p class="type-label">{{ $t('junction_collection') }}</p>
 
 				<v-simple-select
 					v-if="!createM2Mjunction"
@@ -471,13 +454,12 @@
 					id="createM2Mjunction"
 					value="m2mjunction"
 					:label="$t('auto_generate')"
-					:checked="createM2Mjunction"
-					@change="createM2Mjunction = !createM2Mjunction"
+					v-model="createM2Mjunction"
 				/>
 
-				<v-icon name="arrow_backward" size="24" />
+				<v-icon name="arrow_backward" />
 
-				<p class="type-label">{{ $t("related_collection") }}</p>
+				<p class="type-label">{{ $t('related_collection') }}</p>
 
 				<v-simple-select
 					v-model="relationInfoM2M[currentM2MIndex == 0 ? 1 : 0].collection_one"
@@ -532,18 +514,18 @@
 
 		<template slot="options">
 			<h1 v-if="!existing" class="type-heading-medium">
-				{{ $t("field_setup_options") }}
+				{{ $t('field_setup_options') }}
 			</h1>
 
-			<label for="__width" class="type-label">{{ $t("field_width") }}</label>
+			<label for="__width" class="type-label">{{ $t('field_width') }}</label>
 			<v-simple-select v-model="width" name="__width">
-				<option value="half">{{ $t("field_width_half") }}</option>
-				<option value="half-left">{{ $t("field_width_left") }}</option>
-				<option value="half-right">{{ $t("field_width_right") }}</option>
-				<option value="full">{{ $t("field_width_full") }}</option>
-				<option value="fill">{{ $t("field_width_fill") }}</option>
+				<option value="half">{{ $t('field_width_half') }}</option>
+				<option value="half-left">{{ $t('field_width_left') }}</option>
+				<option value="half-right">{{ $t('field_width_right') }}</option>
+				<option value="full">{{ $t('field_width_full') }}</option>
+				<option value="fill">{{ $t('field_width_fill') }}</option>
 			</v-simple-select>
-			<p class="note type-note">{{ $t("field_width_note") }}</p>
+			<p class="note type-note">{{ $t('field_width_note') }}</p>
 
 			<form v-if="selectedInterfaceInfo" class="options" @submit.prevent>
 				<div
@@ -574,7 +556,7 @@
 					class="advanced"
 					:open="existing"
 				>
-					<summary>{{ $t("advanced_options") }}</summary>
+					<summary>{{ $t('advanced_options') }}</summary>
 					<div
 						v-for="(option, optionID) in interfaceOptions.advanced"
 						:key="optionID"
@@ -607,13 +589,14 @@
 </template>
 
 <script>
-import formatTitle from "@directus/format-title";
-import mapping, { datatypes } from "../type-map";
-import { defaultFull } from "../store/modules/permissions/defaults";
-import slug from "slug";
+import formatTitle from '@directus/format-title';
+import mapping, { datatypes } from '../type-map';
+import { defaultFull } from '../store/modules/permissions/defaults';
+import slug from 'slug';
+import { cloneDeep, pickBy, find, findIndex, forEach } from 'lodash';
 
 export default {
-	name: "VFieldSetup",
+	name: 'VFieldSetup',
 	props: {
 		collectionInfo: {
 			type: Object,
@@ -630,7 +613,7 @@ export default {
 	},
 	data() {
 		return {
-			activeTab: "interface",
+			activeTab: 'interface',
 			id: null,
 			sort: null,
 
@@ -650,7 +633,7 @@ export default {
 			hidden_browse: false,
 			primary_key: false,
 			signed: true,
-			width: "full",
+			width: 'full',
 
 			length: null,
 			default_value: null,
@@ -698,47 +681,47 @@ export default {
 				return { icon: null, color: null };
 			}
 			if (this.isFieldValid) {
-				return { icon: "done", color: "success" };
+				return { icon: 'done', color: 'success' };
 			}
 			return {
-				icon: "error",
-				color: "danger",
-				tooltip: this.$t("field_already_exists", { field: "'" + this.field + "'" })
+				icon: 'error',
+				color: 'danger',
+				tooltip: this.$t('field_already_exists', { field: "'" + this.field + "'" })
 			};
 		},
 		collections() {
-			return _.cloneDeep(this.$store.state.collections);
+			return cloneDeep(this.$store.state.collections);
 		},
 		collectionsGrouped() {
 			let restrictedCollection = [
-				"directus_collections",
-				"directus_activity",
-				"directus_fields",
-				"directus_relations"
+				'directus_collections',
+				'directus_activity',
+				'directus_fields',
+				'directus_relations'
 			];
 			const collectionNames = Object.keys(this.collections);
 			const system = collectionNames.filter(
-				name => name.startsWith("directus_") && !restrictedCollection.includes(name)
+				name => name.startsWith('directus_') && !restrictedCollection.includes(name)
 			);
-			const user = collectionNames.filter(name => !name.startsWith("directus_"));
+			const user = collectionNames.filter(name => !name.startsWith('directus_'));
 			return { system, user };
 		},
 		interfaces() {
-			return _.cloneDeep(this.$store.state.extensions.interfaces);
+			return cloneDeep(this.$store.state.extensions.interfaces);
 		},
 		interfacesPopular() {
 			const groups = [
 				{
-					title: this.$t("popular"),
+					title: this.$t('popular'),
 					interfaces: [
-						"text-input",
-						"textarea",
-						"wysiwyg",
-						"toggle",
-						"datetime",
-						"calendar",
-						"file",
-						"many-to-one"
+						'text-input',
+						'textarea',
+						'wysiwyg',
+						'switch',
+						'datetime',
+						'calendar',
+						'file',
+						'many-to-one'
 					]
 				}
 			];
@@ -759,7 +742,7 @@ export default {
 				.map(interfaceName => ({ ...this.interfaces[interfaceName] }));
 		},
 		databaseVendor() {
-			return _.cloneDeep(this.$store.state.serverInfo.databaseVendor);
+			return cloneDeep(this.$store.state.serverInfo.databaseVendor);
 		},
 		primaryKeyDisabled() {
 			if (!this.primaryKeyField) return false;
@@ -770,10 +753,10 @@ export default {
 			if (!this.primaryKeyField) return null;
 
 			if (this.field === this.primaryKeyField.field) {
-				return this.$t("cant_disable_primary");
+				return this.$t('cant_disable_primary');
 			}
 
-			return this.$t("max_one_primary_key");
+			return this.$t('max_one_primary_key');
 		},
 		selectedInterfaceInfo() {
 			if (!this.interfaceName) return null;
@@ -783,8 +766,8 @@ export default {
 		interfaceOptions() {
 			if (!this.selectedInterfaceInfo) return null;
 			const options = Object.assign({}, this.selectedInterfaceInfo.options);
-			const regular = _.pickBy(options, opt => !opt.advanced);
-			const advanced = _.pickBy(options, opt => opt.advanced === true);
+			const regular = pickBy(options, opt => !opt.advanced);
+			const advanced = pickBy(options, opt => opt.advanced === true);
 
 			return { regular, advanced };
 		},
@@ -798,7 +781,7 @@ export default {
 			return this.schemaDisabled === true || !this.field;
 		},
 		displayName() {
-			if (!this.field) return "";
+			if (!this.field) return '';
 			return this.$helpers.formatTitle(this.field);
 		},
 		availableFieldTypes() {
@@ -837,11 +820,11 @@ export default {
 			if (!this.selectedInterfaceInfo) return null;
 			if (!this.selectedInterfaceInfo.relation) return null;
 
-			const relationsThatDontNeedSetup = ["file", "user"];
+			const relationsThatDontNeedSetup = ['file', 'user'];
 
 			let relation;
 
-			if (typeof this.selectedInterfaceInfo.relation === "string") {
+			if (typeof this.selectedInterfaceInfo.relation === 'string') {
 				relation = this.selectedInterfaceInfo.relation;
 			} else {
 				relation = this.selectedInterfaceInfo.relation.type;
@@ -855,24 +838,24 @@ export default {
 		},
 		buttons() {
 			let disabled = false;
-			if (this.activeTab === "interface" && !this.interfaceName) {
+			if (this.activeTab === 'interface' && !this.interfaceName) {
 				disabled = true;
 			}
-			if (this.activeTab === "schema" && !this.field) {
+			if (this.activeTab === 'schema' && !this.field) {
 				disabled = true;
 			}
 			if (this.fieldValid && !this.existing) {
 				disabled = true;
 			}
 
-			let text = this.$t("next");
+			let text = this.$t('next');
 
 			if (
-				this.activeTab === "options" ||
-				(this.activeTab === "schema" && this.hasOptions === false) ||
+				this.activeTab === 'options' ||
+				(this.activeTab === 'schema' && this.hasOptions === false) ||
 				this.existing
 			) {
-				text = this.$t("save");
+				text = this.$t('save');
 			}
 
 			return {
@@ -886,17 +869,17 @@ export default {
 		tabs() {
 			const tabs = {
 				interface: {
-					text: this.$tc("interface", 1)
+					text: this.$tc('interface', 1)
 				},
 				schema: {
-					text: this.$t("schema"),
+					text: this.$t('schema'),
 					disabled: !(this.interfaceName && this.interfaceName.length > 0)
 				}
 			};
 
 			if (this.relation) {
 				tabs.relation = {
-					text: this.$t("relation"),
+					text: this.$t('relation'),
 					disabled: this.schemaDisabled === true || !this.field
 				};
 			}
@@ -907,7 +890,7 @@ export default {
 			if (this.interfaceName && Object.keys(interfaceOptions).length > 0) {
 				let disabled = this.schemaDisabled === true || !this.field;
 				tabs.options = {
-					text: this.$t("options"),
+					text: this.$t('options'),
 					disabled
 				};
 			}
@@ -923,12 +906,12 @@ export default {
 			return false;
 		},
 		primaryKeyField() {
-			return _.find(this.collectionInfo.fields, {
+			return find(this.collectionInfo.fields, {
 				primary_key: true
 			});
 		},
 		currentM2MIndex() {
-			const index = _.findIndex(this.relationInfoM2M, info => {
+			const index = findIndex(this.relationInfoM2M, info => {
 				return info.collection_one === this.collectionInfo.collection;
 			});
 
@@ -936,7 +919,7 @@ export default {
 			return index;
 		},
 		isNumeric() {
-			return this.type === "integer";
+			return this.type === 'integer';
 		}
 	},
 	watch: {
@@ -952,7 +935,7 @@ export default {
 					...this.interfaceOptions.regular
 				};
 
-				_.forEach(options, (info, key) => {
+				forEach(options, (info, key) => {
 					this.$set(this.options, key, info.default);
 				});
 			}
@@ -1002,8 +985,8 @@ export default {
 				// refactored.
 				// Also, this is hardcoded for MySQL TEXT.
 				// Fix for https://github.com/directus/app/issues/1149
-				if (this.length > 255 && this.type.toLowerCase() === "string") {
-					this.datatype = "TEXT";
+				if (this.length > 255 && this.type.toLowerCase() === 'string') {
+					this.datatype = 'TEXT';
 				}
 			}
 		},
@@ -1030,7 +1013,7 @@ export default {
 			if (this.selectedDatatypeInfo && this.selectedDatatypeInfo.decimal) {
 				this.length =
 					this.selectedDatatypeInfo.defaultDigits +
-					"," +
+					',' +
 					this.selectedDatatypeInfo.defaultDecimals;
 			}
 		},
@@ -1043,11 +1026,11 @@ export default {
 			this.isFieldValid = !Object.keys(this.collectionInfo.fields).includes(val);
 
 			if (this.relation) {
-				if (this.relation === "m2o") {
+				if (this.relation === 'm2o') {
 					this.relationInfo.field_many = this.field;
 				}
 
-				if (this.relation === "o2m") {
+				if (this.relation === 'o2m') {
 					this.relationInfo.field_one = this.field;
 				}
 			}
@@ -1074,7 +1057,7 @@ export default {
 		relationInfo: {
 			deep: true,
 			handler() {
-				if (this.relation === "o2m") {
+				if (this.relation === 'o2m') {
 					this.getM2OID();
 				}
 			}
@@ -1092,11 +1075,11 @@ export default {
 				);
 				this.relationInfoM2M[ix].field_many = this.autoM2Msuggestion(
 					currentCollection,
-					"id"
+					'id'
 				);
 				this.relationInfoM2M[ix === 0 ? 1 : 0].field_many = this.autoM2Msuggestion(
 					this.relationInfoM2M[ix == 0 ? 1 : 0].collection_one,
-					"id"
+					'id'
 				);
 			} else {
 				this.initRelation();
@@ -1113,7 +1096,7 @@ export default {
 		this.useFieldInfo();
 		this.initRelation();
 
-		this.activeTab = this.existing ? "options" : "interface";
+		this.activeTab = this.existing ? 'options' : 'interface';
 	},
 	methods: {
 		slug,
@@ -1121,7 +1104,7 @@ export default {
 			if (ext.types) {
 				return this.$helpers.formatTitle(ext.types[0]);
 			} else {
-				return "String";
+				return 'String';
 			}
 		},
 		nextTab() {
@@ -1130,29 +1113,29 @@ export default {
 			}
 
 			switch (this.activeTab) {
-				case "interface":
-					this.activeTab = "schema";
+				case 'interface':
+					this.activeTab = 'schema';
 					break;
-				case "schema":
+				case 'schema':
 					if (this.relation) {
-						return (this.activeTab = "relation");
+						return (this.activeTab = 'relation');
 					}
 
 					if (this.hasOptions === false) {
 						return this.saveField();
 					}
 
-					this.activeTab = "options";
+					this.activeTab = 'options';
 
 					break;
-				case "relation":
+				case 'relation':
 					if (this.hasOptions === false) {
 						return this.saveField();
 					}
 
-					this.activeTab = "options";
+					this.activeTab = 'options';
 					break;
-				case "options":
+				case 'options':
 				default:
 					this.saveField();
 					break;
@@ -1201,16 +1184,16 @@ export default {
 			};
 
 			if (this.relation) {
-				if (this.relation === "m2o") {
+				if (this.relation === 'm2o') {
 					result.relation = { ...this.relationInfo };
 					delete result.relation.field_one;
 				}
 
-				if (this.relation === "o2m") {
+				if (this.relation === 'o2m') {
 					result.relation = { ...this.relationInfo };
 				}
 
-				if (this.relation === "m2m") {
+				if (this.relation === 'm2m') {
 					result.relation = [...this.relationInfoM2M];
 					if (this.createM2Mjunction === true) {
 						this.createM2MjunctionCollection();
@@ -1218,7 +1201,7 @@ export default {
 				}
 			}
 
-			this.$emit("save", result);
+			this.$emit('save', result);
 		},
 		useFieldInfo() {
 			if (!this.fieldInfo || Object.keys(this.fieldInfo).length === 0) return;
@@ -1232,7 +1215,7 @@ export default {
 			// that way). +1 for future optimizations!
 			const fieldName = this.fieldInfo.field;
 			const collectionName = this.collectionInfo.collection;
-			const storeFieldCopy = _.cloneDeep(
+			const storeFieldCopy = cloneDeep(
 				this.$store.state.collections[collectionName].fields[fieldName]
 			);
 
@@ -1253,16 +1236,16 @@ export default {
 			const collection = this.collectionInfo.collection;
 			const field = this.field;
 
-			if (this.relation === "m2o") {
-				const existingRelation = _.cloneDeep(this.$store.getters.m2o(collection, field));
+			if (this.relation === 'm2o') {
+				const existingRelation = cloneDeep(this.$store.getters.m2o(collection, field));
 
 				if (existingRelation) {
-					_.forEach(existingRelation, (val, key) => {
-						if (key && val && key.startsWith("collection")) {
+					forEach(existingRelation, (val, key) => {
+						if (key && val && key.startsWith('collection')) {
 							return this.$set(this.relationInfo, key, val.collection);
 						}
 
-						if (key && val && key.startsWith("field")) {
+						if (key && val && key.startsWith('field')) {
 							return this.$set(this.relationInfo, key, val.field);
 						}
 
@@ -1274,23 +1257,23 @@ export default {
 					this.relationInfo.collection_many = this.collectionInfo.collection;
 					this.relationInfo.field_many = this.field;
 					this.relationInfo.collection_one = Object.values(
-						_.cloneDeep(this.$store.state.collections)
+						cloneDeep(this.$store.state.collections)
 					)[0].collection;
-					this.relationInfo.field_one = _.find(
-						Object.values(_.cloneDeep(this.$store.state.collections))[0].fields,
+					this.relationInfo.field_one = find(
+						Object.values(cloneDeep(this.$store.state.collections))[0].fields,
 						{ primary_key: true }
 					).field;
 				}
-			} else if (this.relation === "o2m") {
-				const existingRelation = _.cloneDeep(this.$store.getters.o2m(collection, field));
+			} else if (this.relation === 'o2m') {
+				const existingRelation = cloneDeep(this.$store.getters.o2m(collection, field));
 
 				if (existingRelation) {
-					_.forEach(existingRelation, (val, key) => {
-						if (key && val && key.startsWith("collection")) {
+					forEach(existingRelation, (val, key) => {
+						if (key && val && key.startsWith('collection')) {
 							return this.$set(this.relationInfo, key, val.collection);
 						}
 
-						if (key && val && key.startsWith("field")) {
+						if (key && val && key.startsWith('field')) {
 							return this.$set(this.relationInfo, key, val.field);
 						}
 
@@ -1303,18 +1286,18 @@ export default {
 					this.relationInfo.field_one = this.field;
 
 					this.relationInfo.collection_many = Object.values(
-						_.cloneDeep(this.$store.state.collections)
+						cloneDeep(this.$store.state.collections)
 					)[0].collection;
 
-					this.relationInfo.field_many = _.find(
-						Object.values(_.cloneDeep(this.$store.state.collections))[0].fields,
+					this.relationInfo.field_many = find(
+						Object.values(cloneDeep(this.$store.state.collections))[0].fields,
 						{ primary_key: false }
 					).field;
 
 					this.getM2OID();
 				}
-			} else if (this.relation === "m2m") {
-				const existingRelation = _.cloneDeep(this.$store.getters.o2m(collection, field));
+			} else if (this.relation === 'm2m') {
+				const existingRelation = cloneDeep(this.$store.getters.o2m(collection, field));
 
 				if (field && existingRelation) {
 					this.relationInfoM2M[0].id = existingRelation.id;
@@ -1377,7 +1360,7 @@ export default {
 					// in order to make it easier for the user to setup the interface
 					if (
 						this.selectedInterfaceInfo.relation &&
-						typeof this.selectedInterfaceInfo.relation === "object"
+						typeof this.selectedInterfaceInfo.relation === 'object'
 					) {
 						if (this.selectedInterfaceInfo.relation.relatedCollection) {
 							this.relationInfoM2M[1].collection_one = this.selectedInterfaceInfo.relation.relatedCollection;
@@ -1390,7 +1373,7 @@ export default {
 			const collection = this.relationInfo.collection_many;
 			const field = this.relationInfo.field_many;
 
-			const m2o = _.cloneDeep(this.$store.getters.m2o(collection, field));
+			const m2o = cloneDeep(this.$store.getters.m2o(collection, field));
 
 			if (m2o) {
 				this.relationInfo.id = m2o.id;
@@ -1414,19 +1397,19 @@ export default {
 		},
 		primaryKeyFieldByCollection(collection) {
 			const fields = this.fields(collection);
-			return _.find(fields, { primary_key: true });
+			return find(fields, { primary_key: true });
 		},
 		validateFieldName(string) {
 			// Based on https://gist.github.com/mathewbyrne/1280286
 			return string
 				.toString()
-				.replace(/\s+/g, "_") // Replace spaces with _
-				.replace(/[^\w_]+/g, "") // Remove all non-word chars
-				.replace(/__+/g, "_") // Replace multiple _ with single _
+				.replace(/\s+/g, '_') // Replace spaces with _
+				.replace(/[^\w_]+/g, '') // Remove all non-word chars
+				.replace(/__+/g, '_') // Replace multiple _ with single _
 				.toLowerCase();
 		},
 		autoM2Msuggestion(collectionName, suffix) {
-			return collectionName + "_" + suffix;
+			return collectionName + '_' + suffix;
 		},
 
 		// issue here getting the new field to add M2M relationships without refreshing
@@ -1434,13 +1417,13 @@ export default {
 			var collectionData = {
 				collection: this.createM2MjunctionName,
 				hidden: true,
-				note: this.$t("junction_collection"),
+				note: this.$t('junction_collection'),
 				fields: [
 					{
-						field: "id",
-						type: "integer",
-						datatype: "int",
-						interface: "primary-key",
+						field: 'id',
+						type: 'integer',
+						datatype: 'int',
+						interface: 'primary-key',
 						primary_key: true,
 						auto_increment: true,
 						signed: false,
@@ -1478,14 +1461,14 @@ export default {
 				id: {
 					auto_increment: true,
 					collection: this.createM2MjunctionName,
-					datatype: "int",
+					datatype: 'int',
 					default_value: null,
-					field: "id",
+					field: 'id',
 					group: null,
 					hidden_detail: true,
 					hidden_browse: true,
-					interface: "primary-key",
-					length: "10",
+					interface: 'primary-key',
+					length: '10',
 					locked: 0,
 					note: null,
 					options: null,
@@ -1495,7 +1478,7 @@ export default {
 					signed: false,
 					sort: 1,
 					translation: null,
-					type: "integer",
+					type: 'integer',
 					unique: false,
 					validation: null,
 					width: 4
@@ -1555,15 +1538,15 @@ export default {
 			};
 			this.$api
 				.createCollection(collectionData, {
-					fields: "*.*"
+					fields: '*.*'
 				})
 				.then(res => res.data)
 				.then(collection => {
-					this.$store.dispatch("addCollection", {
+					this.$store.dispatch('addCollection', {
 						...collection,
 						fields: fieldDispatch
 					});
-					this.$store.dispatch("addPermission", {
+					this.$store.dispatch('addPermission', {
 						collection: this.createM2MjunctionName,
 						permission: {
 							$create: defaultFull,
@@ -1572,8 +1555,8 @@ export default {
 					});
 				})
 				.catch(error => {
-					this.$events.emit("error", {
-						notify: this.$t("something_went_wrong_body"),
+					this.$events.emit('error', {
+						notify: this.$t('something_went_wrong_body'),
 						error
 					});
 				});
@@ -1686,7 +1669,7 @@ form.schema {
 	}
 
 	.name-input {
-		font-family: "Roboto Mono", monospace;
+		font-family: 'Roboto Mono', monospace;
 	}
 
 	.advanced-form,
@@ -1759,10 +1742,10 @@ details {
 		}
 
 		&::after {
-			content: "unfold_more";
+			content: 'unfold_more';
 			direction: ltr;
 			display: inline-block;
-			font-family: "Material Icons";
+			font-family: 'Material Icons';
 			font-size: 18px;
 			color: var(--input-icon-color);
 			font-style: normal;
@@ -1772,7 +1755,7 @@ details {
 			text-transform: none;
 			white-space: nowrap;
 			word-wrap: normal;
-			-webkit-font-feature-settings: "liga";
+			-webkit-font-feature-settings: 'liga';
 			-webkit-font-smoothing: antialiased;
 			transition: var(--fast) var(--transition);
 			width: 28px;
@@ -1784,7 +1767,7 @@ details {
 	}
 
 	&[open] summary::after {
-		content: "unfold_less";
+		content: 'unfold_less';
 	}
 }
 
@@ -1801,9 +1784,9 @@ details {
 .single {
 	display: grid;
 	grid-template-areas:
-		"a _ b"
-		"c _ d"
-		"e f g";
+		'a _ b'
+		'c _ d'
+		'e f g';
 	grid-template-columns: 1fr 20px 1fr;
 	grid-gap: 10px 0;
 	justify-content: center;
@@ -1835,7 +1818,7 @@ details {
 		}
 	}
 
-	i {
+	.v-icon {
 		grid-area: f;
 		color: var(--input-border-color);
 		transform: translateX(-2px);
@@ -1846,11 +1829,11 @@ details {
 	margin-top: 40px;
 	display: grid;
 	grid-template-areas:
-		"a b c d e"
-		"f g h i j"
-		"k l m n o"
-		"p q r s t"
-		"u u v w w";
+		'a b c d e'
+		'f g h i j'
+		'k l m n o'
+		'p q r s t'
+		'u u v w w';
 	grid-template-columns: 1fr 20px 1fr 20px 1fr;
 	grid-gap: 10px 0;
 	justify-content: center;
@@ -1898,7 +1881,7 @@ details {
 		}
 	}
 
-	i {
+	.v-icon {
 		grid-area: l;
 		color: var(--input-border-color);
 		transform: translateX(-2px);
@@ -1908,7 +1891,7 @@ details {
 		}
 	}
 
-	.form-checkbox {
+	.v-checkbox {
 		&:first-of-type {
 			grid-area: v;
 		}

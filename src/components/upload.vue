@@ -1,5 +1,5 @@
 <template>
-	<div class="v-upload" :class="{ uploading: Object.keys(files).length > 0, disabled }">
+	<div class="v-upload" :class="{ uploading, disabled }">
 		<input
 			ref="select"
 			:disabled="disabled"
@@ -12,13 +12,17 @@
 
 		<div class="dropzone" :class="{ smaller: small }">
 			<div class="icon">
-				<v-icon name="cloud_upload" />
+				<v-icon
+					name="cloud_upload"
+					:size="uploading ? 32 : 100"
+					color="--input-icon-color"
+				/>
 			</div>
 			<div class="info">
-				<p class="name type-heading-small">{{ $tc("drop_files", multiple ? 2 : 1) }}</p>
+				<p class="name type-heading-small">{{ $tc('drop_files', multiple ? 2 : 1) }}</p>
 				<p class="file-info no-wrap">
 					{{
-						$t("max_size", {
+						$t('max_size', {
 							size: $helpers.filesize($store.state.serverInfo.maxUploadSize)
 						})
 					}}
@@ -88,10 +92,10 @@
 </template>
 
 <script>
-import filesize from "filesize";
+import filesize from 'filesize';
 
 export default {
-	name: "VUpload",
+	name: 'VUpload',
 	props: {
 		accept: {
 			type: String
@@ -123,12 +127,15 @@ export default {
 			} else {
 				return [];
 			}
+		},
+		uploading() {
+			return Object.keys(this.files).length > 0;
 		}
 	},
 	methods: {
 		saveEmbed() {
 			const id = this.$helpers.shortid.generate();
-			const name = this.embedLink.substring(this.embedLink.lastIndexOf("/") + 1);
+			const name = this.embedLink.substring(this.embedLink.lastIndexOf('/') + 1);
 			this.files = {
 				[id]: {
 					id,
@@ -141,7 +148,7 @@ export default {
 				...this.files
 			};
 			this.$api
-				.createItem("directus_files", {
+				.createItem('directus_files', {
 					data: this.embedLink
 				})
 				.then(res => res.data)
@@ -161,7 +168,7 @@ export default {
 					return data;
 				})
 				.then(data => {
-					this.$emit("upload", {
+					this.$emit('upload', {
 						...this.files[id],
 						data
 					});
@@ -169,8 +176,8 @@ export default {
 				.then(() => (this.embed = false))
 				.then(() => (this.embedLink = null))
 				.catch(error => {
-					this.$events.emit("error", {
-						notify: this.$t("something_went_wrong_body"),
+					this.$events.emit('error', {
+						notify: this.$t('something_went_wrong_body'),
 						error
 					});
 				});
@@ -187,22 +194,22 @@ export default {
 			const { name, size, type } = file;
 
 			if (size !== -1 && size > this.$store.state.serverInfo.maxUploadSize) {
-				this.$events.emit("warning", {
-					notify: this.$t("upload_exceeds_max_size", { filename: name })
+				this.$events.emit('warning', {
+					notify: this.$t('upload_exceeds_max_size', { filename: name })
 				});
 
 				return;
 			}
 
 			if (this.acceptTypesList.length > 0 && !this.acceptTypesList.includes(type)) {
-				this.$events.emit("warning", {
-					notify: this.$t("file_type_not_accepted", { filename: name })
+				this.$events.emit('warning', {
+					notify: this.$t('file_type_not_accepted', { filename: name })
 				});
 
 				return;
 			}
 
-			formData.append("data", file, name);
+			formData.append('data', file, name);
 
 			this.files = {
 				[id]: {
@@ -224,14 +231,14 @@ export default {
 				.then(res => res.data)
 				.then(res => {
 					this.files[id].progress = 100;
-					this.$emit("upload", {
+					this.$emit('upload', {
 						...this.files[id],
 						data: res
 					});
 
 					// reset the inputs
-					this.$refs.select.value = "";
-					this.$refs.drop.value = "";
+					this.$refs.select.value = '';
+					this.$refs.drop.value = '';
 				})
 				.catch(error => {
 					this.files[id].error = error;
@@ -239,9 +246,9 @@ export default {
 					if (error.message) {
 						message = error.message;
 					} else {
-						message = this.$t("something_went_wrong_body");
+						message = this.$t('something_went_wrong_body');
 					}
-					this.$events.emit("error", {
+					this.$events.emit('error', {
 						notify: message,
 						error
 					});
@@ -352,11 +359,6 @@ input.select {
 	border: var(--input-border-width) dashed var(--input-border-color);
 	border-radius: var(--border-radius);
 
-	.icon i {
-		font-size: 100px !important;
-		color: var(--input-icon-color);
-	}
-
 	p {
 		color: currentColor;
 	}
@@ -426,19 +428,8 @@ input.select {
 			display: flex;
 			justify-content: center;
 			align-items: center;
-
-			i {
-				width: 40px;
-				height: 40px;
-				display: flex;
-				justify-content: center;
-				align-items: center;
-				flex-grow: 0;
-				flex-shrink: 0;
-				border-radius: 50%;
-				border: 2px solid var(--heading-text-color);
-				color: var(--heading-text-color);
-			}
+			border: 2px solid var(--input-border-color);
+			border-radius: 50%;
 		}
 
 		.buttons {

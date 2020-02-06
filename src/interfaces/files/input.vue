@@ -1,18 +1,20 @@
 <template>
 	<div class="interface-many-to-many">
 		<v-notice v-if="relationshipSetup === false" color="warning" icon="warning">
-			{{ $t("relationship_not_setup") }}
+			{{ $t('relationship_not_setup') }}
 		</v-notice>
 
+		<v-spinner v-if="initialValue === null" />
+
 		<template v-else>
-			<div v-if="items.length" class="table">
+			<div v-if="items && items.length" class="table">
 				<div class="header">
 					<div class="row">
 						<button v-if="sortable" class="sort-column" @click="toggleManualSort">
 							<v-icon
 								name="sort"
-								size="18"
-								:color="manualSortActive ? 'action' : 'blue-grey-300'"
+								small
+								:color="manualSortActive ? '--action' : '--blue-grey-300'"
 							/>
 						</button>
 						<div class="preview-col" />
@@ -27,7 +29,7 @@
 							<v-icon
 								v-if="sort.field === field.field"
 								:name="sort.asc ? 'arrow_downward' : 'arrow_upward'"
-								size="16"
+								:size="16"
 							/>
 						</button>
 					</div>
@@ -85,27 +87,27 @@
 				</draggable>
 			</div>
 
-			<v-notice v-else>{{ $t("no_items_selected") }}</v-notice>
+			<v-notice v-else>{{ $t('no_items_selected') }}</v-notice>
 
 			<div v-if="!readonly" class="buttons">
 				<v-button
 					v-if="options.allow_create"
 					type="button"
 					:disabled="readonly"
-					icon="add"
 					@click="startAddNewItem"
 				>
-					{{ $t("add_new") }}
+					<v-icon name="add" />
+					{{ $t('add_new') }}
 				</v-button>
 
 				<v-button
 					v-if="options.allow_select"
 					type="button"
 					:disabled="readonly"
-					icon="playlist_add"
 					@click="selectExisting = true"
 				>
-					{{ $t("select_existing") }}
+					<v-icon name="playlist_add" />
+					{{ $t('select_existing') }}
 				</v-button>
 			</div>
 		</template>
@@ -165,12 +167,13 @@
 </template>
 
 <script>
-import mixin from "@directus/extension-toolkit/mixins/interface";
-import { diff } from "deep-object-diff";
-import shortid from "shortid";
+import mixin from '@directus/extension-toolkit/mixins/interface';
+import { diff } from 'deep-object-diff';
+import shortid from 'shortid';
+import { get, find, orderBy, cloneDeep, isEqual, mapValues, merge, difference } from 'lodash';
 
 export default {
-	name: "InterfaceFiles",
+	name: 'InterfaceFiles',
 	mixins: [mixin],
 	data() {
 		return {
@@ -185,12 +188,12 @@ export default {
 
 			dragging: false,
 
-			items: [],
+			items: null,
 			loading: false,
 			error: null,
 			stagedSelection: null,
 
-			initialValue: _.cloneDeep(this.value) || []
+			initialValue: null
 		};
 	},
 
@@ -212,11 +215,11 @@ export default {
 				visibleFieldNames = this.options.fields.map(val => val.trim());
 			}
 
-			visibleFieldNames = this.options.fields.split(",").map(val => val.trim());
+			visibleFieldNames = this.options.fields.split(',').map(val => val.trim());
 
 			// Fields in the related collection (not the JT)
 			const relatedFields = this.relation.junction.collection_one.fields;
-			const recursiveKey = _.get(this.relation, "junction.field_one.field", null);
+			const recursiveKey = get(this.relation, 'junction.field_one.field', null);
 
 			return visibleFieldNames.map(name => {
 				const fieldInfo = relatedFields[name];
@@ -235,12 +238,11 @@ export default {
 
 		// The name of the field that holds the primary key in the related (not JT) collection
 		relatedPrimaryKeyField() {
-			return _.find(this.relation.junction.collection_one.fields, { primary_key: true })
-				.field;
+			return find(this.relation.junction.collection_one.fields, { primary_key: true }).field;
 		},
 
 		selectionPrimaryKeys() {
-			return this.items.map(
+			return this.items?.map(
 				item => item[this.junctionRelatedKey][this.relatedPrimaryKeyField]
 			);
 		},
@@ -248,7 +250,7 @@ export default {
 		// Field in the junction table that holds the sort value in the junction table
 		sortField() {
 			const junctionTableFields = this.relation.collection_many.fields;
-			const sortField = _.find(junctionTableFields, { type: "sort" });
+			const sortField = find(junctionTableFields, { type: 'sort' });
 			return sortField;
 		},
 
@@ -258,7 +260,7 @@ export default {
 		},
 
 		manualSortActive() {
-			return this.sort.field === "$manual";
+			return this.sort.field === '$manual';
 		},
 
 		// The key in the junction row that holds the data of the related item
@@ -267,24 +269,23 @@ export default {
 		},
 
 		junctionPrimaryKey() {
-			return _.find(this.relation.junction.collection_many.fields, { primary_key: true })
-				.field;
+			return find(this.relation.junction.collection_many.fields, { primary_key: true }).field;
 		},
 
 		itemsSorted: {
 			get() {
-				if (this.sort.field === "$manual") {
-					return _.orderBy(
-						_.cloneDeep(this.items),
+				if (this.sort.field === '$manual') {
+					return orderBy(
+						cloneDeep(this.items),
 						item => item[this.sortField.field],
-						this.sort.asc ? "asc" : "desc"
+						this.sort.asc ? 'asc' : 'desc'
 					);
 				}
 
-				return _.orderBy(
-					_.cloneDeep(this.items),
+				return orderBy(
+					cloneDeep(this.items),
 					item => item[this.junctionRelatedKey][this.sort.field],
-					this.sort.asc ? "asc" : "desc"
+					this.sort.asc ? 'asc' : 'desc'
 				);
 			},
 			set(newValue) {
@@ -300,13 +301,13 @@ export default {
 
 	watch: {
 		items(value, oldValue) {
-			if (oldValue === null) return;
+			if (oldValue === null || isEqual(value, oldValue)) return;
 			this.emitValue(value);
 		}
 	},
-	created() {
+	async created() {
 		if (this.sortable) {
-			this.sort.field = "$manual";
+			this.sort.field = '$manual';
 		} else {
 			// Set the default sort column
 			if (this.visibleFields && this.visibleFields.length > 0) {
@@ -314,11 +315,26 @@ export default {
 			}
 		}
 
+		await this.getInitialValue();
+
 		// Set the initial set of items. Filter out any broken junction records
-		this.items = (_.cloneDeep(this.value) || []).filter(item => item[this.junctionRelatedKey]);
+		this.items = (cloneDeep(this.initialValue) || []).filter(
+			item => item[this.junctionRelatedKey]
+		);
 	},
 
 	methods: {
+		async getInitialValue() {
+			const fields = [this.junctionPrimaryKey, this.relation.junction_field + '.*'];
+			const response = await this.$api.getItems(this.relation.collection_many.collection, {
+				fields,
+				filter: {
+					[this.relation.field_many.field]: this.primaryKey
+				}
+			});
+
+			this.initialValue = response.data;
+		},
 		// Change the sort position to the provided field. If the same field is
 		// changed, flip the sort order
 		changeSort(fieldName) {
@@ -338,8 +354,8 @@ export default {
 
 		onFileUpload(fileInfo) {
 			const relatedCollectionFields = this.relation.junction.collection_one.fields;
-			const defaults = _.mapValues(relatedCollectionFields, field => field.default_value);
-			const tempKey = "$temp_" + shortid.generate();
+			const defaults = mapValues(relatedCollectionFields, field => field.default_value);
+			const tempKey = '$temp_' + shortid.generate();
 
 			if (defaults.hasOwnProperty(this.relatedPrimaryKeyField))
 				delete defaults[this.relatedPrimaryKeyField];
@@ -359,25 +375,25 @@ export default {
 		},
 
 		toggleManualSort() {
-			this.sort.field = "$manual";
+			this.sort.field = '$manual';
 			this.sort.asc = true;
 		},
 
 		async startEdit(primaryKey) {
-			let values = _.cloneDeep(
-				this.items.find(i => i[this.junctionPrimaryKey] === primaryKey)
+			let values = cloneDeep(
+				this.items?.find(i => i[this.junctionPrimaryKey] === primaryKey)
 			);
 
-			const isNewItem = typeof primaryKey === "string" && primaryKey.startsWith("$temp_");
+			const isNewItem = typeof primaryKey === 'string' && primaryKey.startsWith('$temp_');
 
 			// Fetch the values from the DB
 			if (isNewItem === false) {
 				const collection = this.relation.collection_many.collection;
 
-				const res = await this.$api.getItem(collection, primaryKey, { fields: "*.*.*" });
+				const res = await this.$api.getItem(collection, primaryKey, { fields: '*.*.*' });
 				const item = res.data;
 
-				values = _.merge({}, item, values);
+				values = merge({}, item, values);
 			}
 
 			this.editItem = values;
@@ -386,7 +402,7 @@ export default {
 		saveEditItem() {
 			const primaryKey = this.editItem[this.junctionPrimaryKey];
 
-			this.items = this.items.map(item => {
+			this.items = this.items?.map(item => {
 				if (item[this.junctionPrimaryKey] === primaryKey) {
 					return this.editItem;
 				}
@@ -409,29 +425,29 @@ export default {
 			const primaryKeys = this.stagedSelection || [];
 
 			// Remove all the items from this.items that aren't selected anymore
-			this.items = this.items.filter(item => {
+			this.items = this.items?.filter(item => {
 				const primaryKey = item[this.junctionRelatedKey][this.relatedPrimaryKeyField];
 				return primaryKeys.includes(primaryKey);
 			});
 
 			// Fetch all the newly selected items so we can render it in the table
-			const itemPrimaryKeys = this.items.map(
+			const itemPrimaryKeys = this.items?.map(
 				item => item[this.junctionRelatedKey][this.relatedPrimaryKeyField]
 			);
-			const newlyAddedItems = _.difference(primaryKeys, itemPrimaryKeys);
+			const newlyAddedItems = difference(primaryKeys, itemPrimaryKeys);
 
 			const res = await this.$api.getItem(
 				this.relation.junction.collection_one.collection,
-				newlyAddedItems.join(","),
+				newlyAddedItems.join(','),
 				{
-					fields: "*.*.*"
+					fields: '*.*.*'
 				}
 			);
 
 			const items = Array.isArray(res.data) ? res.data : [res.data];
 
-			const newJunctionRecords = items.map(nested => {
-				const tempKey = "$temp_" + shortid.generate();
+			const newJunctionRecords = items?.map(nested => {
+				const tempKey = '$temp_' + shortid.generate();
 
 				return {
 					[this.junctionPrimaryKey]: tempKey,
@@ -451,17 +467,17 @@ export default {
 		},
 
 		deleteItem(primaryKey) {
-			this.items = this.items.filter(jr => {
+			this.items = this.items?.filter(jr => {
 				const jrPrimaryKey = jr[this.junctionPrimaryKey];
 				return jrPrimaryKey !== primaryKey;
 			});
 		},
 
 		emitValue(value) {
-			value = _.cloneDeep(value);
+			value = cloneDeep(value);
 
 			// This is the key in the nested related object that holds the parent item again
-			const recursiveKey = _.get(this.relation, "junction.field_one.field", null);
+			const recursiveKey = get(this.relation, 'junction.field_one.field', null);
 
 			const newValue = value
 				.map(after => {
@@ -493,7 +509,7 @@ export default {
 								delete newVal[this.junctionRelatedKey][recursiveKey];
 							}
 
-							return _.merge({}, newVal, delta);
+							return merge({}, newVal, delta);
 						} else {
 							return null;
 						}
@@ -501,8 +517,8 @@ export default {
 
 					// If the junction item didn't exist before yet:
 					if (
-						typeof after[this.junctionPrimaryKey] === "string" &&
-						after[this.junctionPrimaryKey].startsWith("$temp_")
+						typeof after[this.junctionPrimaryKey] === 'string' &&
+						after[this.junctionPrimaryKey].startsWith('$temp_')
 					) {
 						// Seeing that the file is uploaded and therefore created before the current item is saved
 						// we only have to save the id of the file for the junction row
@@ -521,7 +537,7 @@ export default {
 
 			const savedPrimaryKeys = this.initialValue.map(jr => jr[this.junctionPrimaryKey]);
 			const newPrimaryKeys = value.map(jr => jr[this.junctionPrimaryKey]);
-			const deletedKeys = _.difference(savedPrimaryKeys, newPrimaryKeys);
+			const deletedKeys = difference(savedPrimaryKeys, newPrimaryKeys);
 			const deletedJunctionRows = deletedKeys.map(key => {
 				return {
 					[this.junctionPrimaryKey]: key,
@@ -529,7 +545,7 @@ export default {
 				};
 			});
 
-			this.$emit("input", [...newValue, ...deletedJunctionRows]);
+			this.$emit('input', [...newValue, ...deletedJunctionRows]);
 		}
 	}
 };

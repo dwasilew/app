@@ -1,6 +1,6 @@
 <template>
 	<div v-if="loading" class="v-permissions interface loading">
-		<v-spinner line-fg-color="var(--blue-grey-300)" line-bg-color="var(--blue-grey-200)" />
+		<v-spinner color="--blue-grey-300" background-color="--blue-grey-200" />
 	</div>
 	<div v-else class="interface">
 		<div class="v-permissions">
@@ -12,7 +12,7 @@
 					color="gray"
 					class="no-collections-message"
 				>
-					{{ $t("permissions_no_collections") }}
+					{{ $t('permissions_no_collections') }}
 				</v-notice>
 
 				<v-permissions-row
@@ -39,19 +39,17 @@
 				</template>
 			</div>
 		</div>
-		<label>
-			<v-toggle id="toggle-directus" v-model="showDirectus" class="toggle" />
-			{{ $t("show_directus_collections") }}
-		</label>
+		<v-switch v-model="showDirectus" :label="$t('show_directus_collections')" />
 	</div>
 </template>
 
 <script>
-import VPermissionsHeader from "./permissions-header.vue";
-import VPermissionsRow from "./permissions-row.vue";
+import VPermissionsHeader from './permissions-header.vue';
+import VPermissionsRow from './permissions-row.vue';
+import { pickBy, forEach } from 'lodash';
 
 export default {
-	name: "VPermissions",
+	name: 'VPermissions',
 	components: {
 		VPermissionsHeader,
 		VPermissionsRow
@@ -81,8 +79,8 @@ export default {
 	},
 	computed: {
 		directusRows() {
-			const permissions = _.pickBy(this.permissions, (permission, collection) =>
-				collection.startsWith("directus_")
+			const permissions = pickBy(this.permissions, (permission, collection) =>
+				collection.startsWith('directus_')
 			);
 
 			return _(permissions)
@@ -92,9 +90,9 @@ export default {
 				.value();
 		},
 		rows() {
-			const permissions = _.pickBy(
+			const permissions = pickBy(
 				this.permissions,
-				(permission, collection) => collection.startsWith("directus_") === false
+				(permission, collection) => collection.startsWith('directus_') === false
 			);
 
 			return _(permissions)
@@ -109,24 +107,24 @@ export default {
 			const changes = [];
 			let full = true;
 
-			_.forEach(this.permissions, (column, collection) => {
-				if (collection.startsWith("directus_")) return;
+			forEach(this.permissions, (column, collection) => {
+				if (collection.startsWith('directus_')) return;
 				if (this.statuses[collection]) {
-					_.forEach(column, statusColumn => {
-						if (statusColumn[permission] === "full") {
+					forEach(column, statusColumn => {
+						if (statusColumn[permission] === 'full') {
 							full = false;
 						}
 					});
 					return;
 				}
 
-				if (column[permission] === "full") {
+				if (column[permission] === 'full') {
 					full = false;
 				}
 			});
 
 			Object.keys(this.permissions).forEach(collection => {
-				if (collection.startsWith("directus_")) return;
+				if (collection.startsWith('directus_')) return;
 
 				if (this.statuses[collection]) {
 					return Object.keys(this.statuses[collection].mapping).forEach(status => {
@@ -134,7 +132,7 @@ export default {
 							collection,
 							status,
 							permission,
-							value: full ? "full" : "none"
+							value: full ? 'full' : 'none'
 						});
 					});
 				}
@@ -142,11 +140,11 @@ export default {
 				changes.push({
 					collection,
 					permission,
-					value: full ? "full" : "none"
+					value: full ? 'full' : 'none'
 				});
 			});
 
-			this.$emit("input", changes);
+			this.$emit('input', changes);
 		}
 	}
 };
@@ -160,6 +158,8 @@ export default {
 	border-radius: var(--border-radius);
 	border: var(--input-border-width) solid var(--input-border-color);
 	max-width: 632px;
+	margin-bottom: 16px;
+
 	.no-collections-message {
 		margin-top: 20px;
 		margin-bottom: 40px;
@@ -173,14 +173,14 @@ export default {
 		&.sub {
 			position: relative;
 			&::before {
-				content: "call_missed_outgoing";
-				font-family: "Material Icons";
+				content: 'call_missed_outgoing';
+				font-family: 'Material Icons';
 				position: absolute;
 				top: 8px;
 				transform: rotate(45deg);
 				font-size: 18px;
 				color: var(--input-icon-color);
-				font-feature-settings: "liga";
+				font-feature-settings: 'liga';
 			}
 			& .cell:first-child {
 				padding-left: 2rem;
@@ -207,17 +207,14 @@ export default {
 			flex-basis: 100px;
 		}
 	}
+
 	&.loading {
 		padding: 300px 0;
-	}
-}
-label {
-	display: flex;
-	cursor: pointer;
-	align-items: center;
-	margin-top: 10px;
-	.toggle {
-		margin-right: 5px;
+		text-align: center;
+
+		.v-spinner {
+			display: inline-block;
+		}
 	}
 }
 </style>

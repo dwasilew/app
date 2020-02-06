@@ -213,14 +213,15 @@
 </template>
 
 <script>
-import mapping, { datatypes } from "../../type-map";
-import { mapState } from "vuex";
+import mapping, { datatypes } from '../../type-map';
+import { mapState } from 'vuex';
+import { mapValues } from 'lodash';
 
 export default {
-	name: "InterfaceDebugger",
+	name: 'InterfaceDebugger',
 	metaInfo() {
 		return {
-			title: "Interface Debugger"
+			title: 'Interface Debugger'
 		};
 	},
 	props: {
@@ -240,28 +241,28 @@ export default {
 			options: {},
 			width: 2000,
 			newItem: false,
-			collection: "members",
+			collection: 'members',
 			relation: {
-				field_many: "favorites",
-				field_one: "members",
-				collection_many: "members",
-				collection_one: "movies",
-				junction_field: ""
+				field_many: 'favorites',
+				field_one: 'members',
+				collection_many: 'members',
+				collection_one: 'movies',
+				junction_field: ''
 			},
 			customFields: {
 				name: {
-					collection: "movies",
+					collection: 'movies',
 					default_value: null,
-					field: "name",
+					field: 'name',
 					group: null,
 					hidden_detail: false,
 					hidden_browse: false,
 					id: 154,
-					interface: "text-input",
-					length: "100",
+					interface: 'text-input',
+					length: '100',
 					locked: false,
 					managed: true,
-					name: "Name",
+					name: 'Name',
 					note: null,
 					options: null,
 					primary_key: false,
@@ -269,25 +270,25 @@ export default {
 					relation: null,
 					required: false,
 					signed: null,
-					sort: "10",
+					sort: '10',
 					translation: null,
-					type: "VARCHAR",
+					type: 'VARCHAR',
 					validation: null,
 					width: 4
 				},
 				director: {
-					collection: "movies",
+					collection: 'movies',
 					default_value: null,
-					field: "director",
+					field: 'director',
 					group: null,
 					hidden_detail: false,
 					hidden_browse: false,
 					id: 161,
-					interface: "text-input",
-					length: "100",
+					interface: 'text-input',
+					length: '100',
 					locked: false,
 					managed: true,
-					name: "Director",
+					name: 'Director',
 					note: null,
 					options: null,
 					primary_key: false,
@@ -295,31 +296,31 @@ export default {
 					relation: null,
 					required: false,
 					signed: null,
-					sort: "9",
+					sort: '9',
 					translation: null,
-					type: "VARCHAR",
+					type: 'VARCHAR',
 					validation: null,
 					width: 4
 				}
 			},
 			customValues: {
 				id: 123,
-				name: "Directus The Movie",
-				director: "Ben Spielberg",
+				name: 'Directus The Movie',
+				director: 'Ben Spielberg',
 				preview: null
 			}
 		};
 	},
 	computed: {
-		...mapState(["currentProjectKey"]),
+		...mapState(['currentProjectKey']),
 		links() {
 			return [
 				{
-					name: this.$t("settings"),
+					name: this.$t('settings'),
 					path: `/${this.currentProjectKey}/settings`
 				},
 				{
-					name: this.$tc("interface", 2),
+					name: this.$tc('interface', 2),
 					path: `/${this.currentProjectKey}/settings/interfaces`
 				},
 				{
@@ -382,7 +383,7 @@ export default {
 			this.type = this.extension.types[0];
 
 			// Populate the options with the default values
-			const defaults = _.mapValues(this.extension.options, settings =>
+			const defaults = mapValues(this.extension.options, settings =>
 				settings.default === undefined ? null : settings.default
 			);
 

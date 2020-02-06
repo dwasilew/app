@@ -13,8 +13,8 @@
 							v-tooltip="$t('turn_all_on')"
 							class="icon"
 							name="done"
-							size="18"
-							color="success"
+							small
+							color="--success"
 						/>
 					</button>
 					<button class="off" type="button" @click.prevent="setAll(false)">
@@ -22,8 +22,8 @@
 							v-tooltip="$t('turn_all_off')"
 							class="icon"
 							name="block"
-							size="18"
-							color="danger"
+							small
+							color="--danger"
 						/>
 					</button>
 				</span>
@@ -77,7 +77,7 @@
 					:class="{ limited: fieldState }"
 					@click="fieldsSelect = { collection: permissionName }"
 				>
-					{{ fieldState ? $t("limited") : $t("all") }}
+					{{ fieldState ? $t('limited') : $t('all') }}
 				</button>
 			</div>
 			<div class="cell"><span class="mixed">--</span></div>
@@ -95,8 +95,8 @@
 							v-tooltip="$t('turn_all_on')"
 							class="icon"
 							name="done"
-							size="18"
-							color="success"
+							small
+							color="--success"
 						/>
 					</button>
 					<button class="off" type="button" @click.prevent="setAll(false)">
@@ -104,8 +104,8 @@
 							v-tooltip="$t('turn_all_off')"
 							class="icon"
 							name="block"
-							size="18"
-							color="danger"
+							small
+							color="--danger"
 						/>
 					</button>
 				</span>
@@ -156,7 +156,7 @@
       -->
 			<div class="cell">
 				<button :class="{ limited: fieldState }" @click="active = !active">
-					{{ fieldState ? $t("mixed") : $t("all") }}
+					{{ fieldState ? $t('mixed') : $t('all') }}
 				</button>
 			</div>
 			<div class="cell">
@@ -166,7 +166,7 @@
 		<template v-if="active">
 			<div class="sub row">
 				<div v-tooltip="'System Option'" class="cell">
-					{{ $t("permission_states.on_create") }}
+					{{ $t('permission_states.on_create') }}
 				</div>
 				<div class="cell block"><v-icon name="block" /></div>
 				<div class="cell block"><v-icon name="block" /></div>
@@ -178,7 +178,7 @@
 						:class="{ limited: getFieldSettingsPerStatus('$create') }"
 						@click="fieldsSelect = { collection: permissionName, status: '$create' }"
 					>
-						{{ getFieldSettingsPerStatus("$create") ? $t("limited") : $t("all") }}
+						{{ getFieldSettingsPerStatus('$create') ? $t('limited') : $t('all') }}
 					</button>
 				</div>
 				<div v-if="statuses" class="cell">
@@ -190,8 +190,8 @@
 					>
 						{{
 							(permission.$create.status_blacklist || []).length === 0
-								? $t("all")
-								: $t("limited")
+								? $t('all')
+								: $t('limited')
 						}}
 					</button>
 				</div>
@@ -256,7 +256,7 @@
 						:class="{ limited: getFieldSettingsPerStatus(status) }"
 						@click="fieldsSelect = { collection: permissionName, status }"
 					>
-						{{ getFieldSettingsPerStatus(status) ? $t("limited") : $t("all") }}
+						{{ getFieldSettingsPerStatus(status) ? $t('limited') : $t('all') }}
 					</button>
 				</div>
 				<div class="cell">
@@ -268,8 +268,8 @@
 					>
 						{{
 							(permission[status].status_blacklist || []).length === 0
-								? $t("all")
-								: $t("limited")
+								? $t('all')
+								: $t('limited')
 						}}
 					</button>
 				</div>
@@ -287,24 +287,24 @@
 			>
 				<form class="modal-content" @submit.prevent>
 					<fieldset>
-						<legend class="type-label">{{ $t("readable_fields") }}</legend>
+						<legend class="type-label">{{ $t('readable_fields') }}</legend>
 						<v-checkbox
 							v-for="(field, name) in fieldsWithoutPK"
 							:id="`${permissionName}-read-${name}`"
 							:key="`${permissionName}-read-${name}`"
-							:checked="!blacklist.read.includes(name)"
+							:inputValue="!blacklist.read.includes(name)"
 							:label="$helpers.formatTitle(name)"
 							:value="name"
 							@change="toggleField(name)"
 						/>
 					</fieldset>
 					<fieldset>
-						<legend class="type-label">{{ $t("writable_fields") }}</legend>
+						<legend class="type-label">{{ $t('writable_fields') }}</legend>
 						<v-checkbox
 							v-for="(field, name) in fields"
 							:id="`${permissionName}-write-${name}`"
 							:key="`${permissionName}-write-${name}`"
-							:checked="!blacklist.write.includes(name)"
+							:inputValue="!blacklist.write.includes(name)"
 							:label="$helpers.formatTitle(name)"
 							:value="name"
 							@change="toggleField(name, true)"
@@ -322,12 +322,12 @@
 			>
 				<form class="modal-content" @submit.prevent>
 					<fieldset>
-						<legend class="type-label">{{ $t("allowed_status_options") }}</legend>
+						<legend class="type-label">{{ $t('allowed_status_options') }}</legend>
 						<v-checkbox
 							v-for="(status, name) in statuses"
 							:id="`status-${name}`"
 							:key="`status-${name}`"
-							:checked="
+							:inputValue="
 								!(permission[statusSelect.status].status_blacklist || []).includes(
 									name
 								)
@@ -344,10 +344,11 @@
 </template>
 
 <script>
-import VPermissionsToggle from "./permissions-toggle.vue";
+import VPermissionsToggle from './permissions-toggle.vue';
+import { find, forEach } from 'lodash';
 
 export default {
-	name: "VPermissionsRow",
+	name: 'VPermissionsRow',
 	components: {
 		VPermissionsToggle
 	},
@@ -382,7 +383,7 @@ export default {
 	},
 	computed: {
 		primaryKeyFieldName() {
-			return _.find(this.fields, { primary_key: true }).field;
+			return find(this.fields, { primary_key: true }).field;
 		},
 		fieldsWithoutPK() {
 			const fieldsCopy = Object.assign({}, this.fields);
@@ -411,12 +412,12 @@ export default {
 		 * @return {Boolean}
 		 */
 		fieldState() {
-			if (!this.permission) return this.$t("all");
+			if (!this.permission) return this.$t('all');
 
 			if (this.statuses) {
 				let all = true;
 
-				_.forEach(this.permission, permission => {
+				forEach(this.permission, permission => {
 					if (
 						permission.read_field_blacklist.length > 0 ||
 						permission.write_field_blacklist.length > 0
@@ -438,36 +439,36 @@ export default {
 			return true;
 		},
 		userCreatedField() {
-			return _.find(this.fields, field => field.type && field.type.toLowerCase() === "owner");
+			return find(this.fields, field => field.type && field.type.toLowerCase() === 'owner');
 		},
 		permissionOptions() {
 			// To provide all options for core table as well as those collections which contains usercreated field
-			return this.userCreatedField || this.permissionName.startsWith("directus_")
-				? ["none", "mine", "role", "full"]
-				: ["none", "full"];
+			return this.userCreatedField || this.permissionName.startsWith('directus_')
+				? ['none', 'mine', 'role', 'full']
+				: ['none', 'full'];
 		}
 	},
 	methods: {
 		setAll(enabled = true) {
 			const newPermission = enabled
 				? {
-						create: "full",
-						read: "full",
-						update: "full",
-						delete: "full",
-						comment: "full",
-						explain: "none",
+						create: 'full',
+						read: 'full',
+						update: 'full',
+						delete: 'full',
+						comment: 'full',
+						explain: 'none',
 						read_field_blacklist: [],
 						write_field_blacklist: [],
 						status_blacklist: []
 				  }
 				: {
-						create: "none",
-						read: "none",
-						update: "none",
-						delete: "none",
-						comment: "none",
-						explain: "none",
+						create: 'none',
+						read: 'none',
+						update: 'none',
+						delete: 'none',
+						comment: 'none',
+						explain: 'none',
 						read_field_blacklist: [],
 						write_field_blacklist: [],
 						status_blacklist: []
@@ -487,11 +488,11 @@ export default {
 					});
 				});
 
-				return this.$emit("input", changes);
+				return this.$emit('input', changes);
 			}
 
 			return this.$emit(
-				"input",
+				'input',
 				Object.keys(newPermission).map(permission => ({
 					collection: this.permissionName,
 					permission,
@@ -500,7 +501,7 @@ export default {
 			);
 		},
 		emitValue(permission, value, status = null) {
-			this.$emit("input", {
+			this.$emit('input', {
 				collection: this.permissionName,
 				permission,
 				value,
@@ -512,8 +513,8 @@ export default {
 
 			let value = this.permission[Object.keys(this.statuses)[0]][field];
 
-			_.forEach(this.permission, (status, name) => {
-				if (name !== "$create" && status[field] !== value) value = "indeterminate";
+			forEach(this.permission, (status, name) => {
+				if (name !== '$create' && status[field] !== value) value = 'indeterminate';
 			});
 
 			return value;
@@ -543,7 +544,7 @@ export default {
 
 			const selectedFields = write ? this.blacklist.write : this.blacklist.read;
 
-			const permissionField = write ? "write_field_blacklist" : "read_field_blacklist";
+			const permissionField = write ? 'write_field_blacklist' : 'read_field_blacklist';
 
 			if (selectedFields.includes(field)) {
 				return this.emitValue(
@@ -565,13 +566,13 @@ export default {
 
 			if (selectedStatuses.includes(status)) {
 				return this.emitValue(
-					"status_blacklist",
+					'status_blacklist',
 					selectedStatuses.filter(s => s !== status),
 					parentStatus
 				);
 			}
 
-			return this.emitValue("status_blacklist", [...selectedStatuses, status], parentStatus);
+			return this.emitValue('status_blacklist', [...selectedStatuses, status], parentStatus);
 		}
 	}
 };
